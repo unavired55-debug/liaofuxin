@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中华文明 · 历史发展年鉴（多视角版）</title>
+<style>
+/* ========== CSS 变量与主题 ========== */
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: rgba(20, 20, 40, 0.75);
+  --text-primary: #e8d5b7;
+  --text-secondary: #c4b99a;
+  --text-heading: #f0e0c0;
+  --gold: #d4a745;
+  --gold-light: #f0d68a;
+  --vermillion: #c94f3a;
+  --vermillion-light: #e8654f;
+  --accent-blue: #7b9eb3;
+  --accent-green: #8a9e7b;
+  --border-gold: linear-gradient(135deg, rgba(212,167,69,0.6), rgba(212,167,69,0.1), rgba(212,167,69,0.6));
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --glass-bg: rgba(25, 25, 45, 0.7);
+  --timeline-bg: #1a1a2e;
+  --breadcrumb-bg: rgba(10,10,25,0.9);
+  --node-default: #6b6b8a;
+  --particle-color: #d4a745;
+  --texture-opacity: 0.05;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f5f0e8;
+  --bg-secondary: #ede4d3;
+  --bg-card: rgba(255,250,240,0.85);
+  --text-primary: #3a2f28;
+  --text-secondary: #5a4f45;
+  --text-heading: #2a1f18;
+  --gold: #b8860b;
+  --gold-light: #d4a745;
+  --vermillion: #b8422e;
+  --vermillion-light: #d44a3a;
+  --accent-blue: #5a7a8a;
+  --accent-green: #6a8a5a;
+  --glass-bg: rgba(255,248,240,0.7);
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  --timeline-bg: #f0ebe0;
+  --breadcrumb-bg: rgba(240,235,220,0.95);
+  --node-default: #9a9a8a;
+  --particle-color: #b8860b;
+  --texture-opacity: 0.08;
+}
+
+/* ========== 基础样式 ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Serif SC', 'SimSun', 'STSong', 'Songti SC', 'KaiTi', 'STKaiti', serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background 0.5s, color 0.5s;
+  position: relative;
+}
+
+/* 背景纹理 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(212,167,69,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(201,79,58,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(123,158,179,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ========== 粒子动画层 ========== */
+#particles-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ========== 主容器 ========== */
+.app-container {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  min-height: 100vh;
+}
+
+/* ========== 顶部导航栏 ========== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--breadcrumb-bg);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212,167,69,0.3);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav-title {
+  font-size: 1.2rem;
+  color: var(--gold);
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+
+.breadcrumb a {
+  color: var(--gold-light);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.breadcrumb a:hover {
+  color: var(--vermillion-light);
+  background: rgba(212,167,69,0.1);
+}
+
+.breadcrumb .separator {
+  color: var(--gold);
+  opacity: 0.5;
+}
+
+.breadcrumb .current {
+  color: var(--vermillion-light);
+  font-weight: bold;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.theme-toggle:hover {
+  background: var(--gold);
+  color: var(--bg-primary);
+}
+
+/* ========== 快速跳转按钮组 ========== */
+.quick-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 16px 24px;
+  z-index: 10;
+  position: relative;
+}
+
+.quick-nav-btn {
+  background: rgba(212,167,69,0.1);
+  border: 1px solid rgba(212,167,69,0.3);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.quick-nav-btn:hover, .quick-nav-btn.active {
+  background: var(--gold);
+  color: #1a1a2e;
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(212,167,69,0.3);
+}
+
+/* ========== 第一级：时间轴 ========== */
+.timeline-container {
+  position: relative;
+  padding: 20px 0;
+  z-index: 2;
+}
+
+.timeline-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 40px 60px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 3px;
+}
+
+.timeline-line {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-width: max-content;
+  gap: 0;
+}
+
+/* 时间轴中轴线 */
+.timeline-line::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--vermillion), var(--gold), var(--accent-blue), var(--gold));
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
+
+.timeline-node {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 28px;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--node-default);
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  transition: all 0.4s;
+  position: relative;
+  z-index: 4;
+}
+
+.timeline-node:hover .timeline-dot {
+  transform: scale(1.6);
+  box-shadow: 0 0 24px currentColor;
+}
+
+.timeline-label {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.timeline-node:hover .timeline-label {
+  color: var(--gold-light);
+  font-weight: bold;
+}
+
+.timeline-year {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+/* 节点颜色按朝代分组 */
+.timeline-dot.prehistoric { background: #8a7a5a; }
+.timeline-dot.early-dynasties { background: #a08040; }
+.timeline-dot.qin-han { background: #c94f3a; }
+.timeline-dot.division { background: #6b8a8a; }
+.timeline-dot.sui-tang { background: #d4a745; }
+.timeline-dot.song-yuan { background: #7b9eb3; }
+.timeline-dot.ming-qing { background: #8a5a4a; }
+.timeline-dot.modern { background: #c94040; }
+
+.timeline-node.selected .timeline-dot {
+  transform: scale(1.8);
+  box-shadow: 0 0 30px var(--gold-light);
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 20px var(--gold-light); }
+  50% { box-shadow: 0 0 40px var(--gold-light), 0 0 60px var(--gold); }
+}
+
+/* 悬浮浮层 */
+.timeline-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212,167,69,0.5);
+  border-radius: 8px;
+  padding: 8px 14px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 5;
+  margin-bottom: 8px;
+}
+
+.timeline-node:hover .timeline-tooltip {
+  opacity: 1;
+}
+
+/* ========== 内容展示区 ========== */
+.content-area {
+  padding: 20px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* 时期概览标题 */
+.period-header {
+  text-align: center;
+  margin-bottom: 32px;
+  animation: fadeInUp 0.5s ease;
+}
+
+.period-header .period-name {
+  font-size: 2.8rem;
+  color: var(--gold);
+  letter-spacing: 6px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.period-header .period-info {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+}
+
+.period-header .period-tags {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.p-tag {
+  background: rgba(212,167,69,0.15);
+  border: 1px solid rgba(212,167,69,0.3);
+  padding: 4px 14px;
+  border-radius: 14px;
+  font-size: 0.8rem;
+  color: var(--gold-light);
+}
+
+/* ========== 第二级：视角卡片网格 ========== */
+.perspectives-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  animation: fadeInUp 0.5s ease;
+}
+
+.perspective-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212,167,69,0.2);
+  border-radius: 16px;
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.perspective-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--border-gold);
+  border-radius: 16px 16px 0 0;
+}
+
+.perspective-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 24px rgba(212,167,69,0.15);
+  border-color: rgba(212,167,69,0.5);
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.card-type-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  color: var(--gold);
+  background: rgba(212,167,69,0.1);
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.card-guide {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.card-tag {
+  font-size: 0.7rem;
+  color: var(--accent-blue);
+  border: 1px solid rgba(123,158,179,0.4);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ========== 第三级：视角详情 ========== */
+.perspective-detail {
+  animation: fadeInUp 0.5s ease;
+}
+
+.detail-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212,167,69,0.3);
+  border-radius: 20px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.detail-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--border-gold);
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.detail-icon-area {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+}
+
+.detail-title-area {
+  flex: 1;
+}
+
+.detail-title {
+  font-size: 2rem;
+  color: var(--gold);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.detail-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.detail-seal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--vermillion);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vermillion);
+  font-size: 0.75rem;
+  transform: rotate(12deg);
+  opacity: 0.7;
+  writing-mode: vertical-rl;
+  letter-spacing: 4px;
+}
+
+.detail-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 768px) {
+  .detail-body { grid-template-columns: 1fr; }
+}
+
+.detail-main {
+  line-height: 2;
+  font-size: 1rem;
+}
+
+.detail-main h3 {
+  color: var(--gold-light);
+  font-size: 1.2rem;
+  margin: 20px 0 10px;
+  letter-spacing: 2px;
+  border-left: 3px solid var(--gold);
+  padding-left: 12px;
+}
+
+.detail-main p {
+  text-indent: 2em;
+  margin-bottom: 12px;
+}
+
+.detail-sidebar {
+  background: rgba(212,167,69,0.05);
+  border-left: 1px solid rgba(212,167,69,0.2);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.detail-sidebar h4 {
+  color: var(--gold);
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.keyword-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.keyword-item {
+  background: rgba(212,167,69,0.15);
+  color: var(--gold-light);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.related-events {
+  list-style: none;
+  padding: 0;
+}
+
+.related-events li {
+  padding: 8px 0;
+  border-bottom: 1px dotted rgba(212,167,69,0.15);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.related-events li::before {
+  content: '◆ ';
+  color: var(--gold);
+  font-size: 0.6rem;
+}
+
+/* ========== 按钮样式 ========== */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212,167,69,0.1);
+  border: 1px solid rgba(212,167,69,0.4);
+  color: var(--gold-light);
+  padding: 10px 22px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  font-family: inherit;
+  margin-bottom: 20px;
+}
+
+.btn-back:hover {
+  background: var(--gold);
+  color: #1a1a2e;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* ========== 动画 ========== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in { animation: fadeIn 0.5s ease; }
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+  .timeline-scroll { padding: 30px 20px; }
+  .timeline-node { padding: 0 16px; }
+  .content-area { padding: 16px; }
+  .perspectives-grid { grid-template-columns: 1fr; }
+  .period-header .period-name { font-size: 1.8rem; letter-spacing: 3px; }
+  .navbar { padding: 10px 12px; }
+  .nav-title { font-size: 1rem; }
+  .detail-panel { padding: 20px; }
+  .detail-body { grid-template-columns: 1fr; }
+  .detail-title { font-size: 1.4rem; }
+  .detail-seal { top: 8px; right: 10px; width: 40px; height: 40px; font-size: 0.6rem; }
+  .quick-nav-btn { padding: 6px 10px; font-size: 0.75rem; }
+}
+
+/* ========== 隐藏/显示控制 ========== */
+.hidden { display: none !important; }
+
+/* ========== 页面尾部 ========== */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  border-top: 1px solid rgba(212,167,69,0.15);
+  margin-top: 60px;
+}
+</style>
+</head>
+<body>
+
+<!-- 粒子画布 -->
+<canvas id="particles-canvas"></canvas>
+
+<div class="app-container">
+  <!-- 顶部导航 -->
+  <nav class="navbar">
+    <span class="nav-title" onclick="goToOverview()" style="cursor:pointer;">📜 中华文明·历史年鉴</span>
+    <div class="breadcrumb" id="breadcrumb">
+      <a onclick="goToOverview()">总览</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 夜间模式</button>
+    </div>
+  </nav>
+
+  <!-- 快速跳转按钮组 -->
+  <div class="quick-nav" id="quick-nav">
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('远古')">远古</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('先秦')">先秦</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('秦汉')">秦汉</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('魏晋南北朝')">魏晋南北朝</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('隋唐')">隋唐</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('宋元')">宋元</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('明清')">明清</button>
+    <button class="quick-nav-btn" onclick="scrollToPeriodGroup('近现代')">近现代</button>
+  </div>
+
+  <!-- 第一级：时间轴 -->
+  <div class="timeline-container" id="timeline-container">
+    <div class="timeline-scroll" id="timeline-scroll">
+      <div class="timeline-line" id="timeline-line">
+        <!-- JS动态生成时间轴节点 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 内容展示区（第二级/第三级） -->
+  <div class="content-area" id="content-area">
+    <!-- 默认欢迎信息 -->
+    <div id="welcome-message" style="text-align:center;padding:60px 20px;">
+      <h2 style="color:var(--gold);font-size:2rem;letter-spacing:6px;margin-bottom:16px;">以史为鉴 · 可知兴替</h2>
+      <p style="color:var(--text-secondary);letter-spacing:2px;">点击时间轴上的朝代节点，选择经典历史视角，开启深度阅读之旅</p>
+      <p style="color:var(--text-secondary);opacity:0.6;margin-top:12px;">覆盖远古至当代 · 24个历史时期 · 60+经典视角</p>
+    </div>
+    <div id="level2-content" class="hidden"></div>
+    <div id="level3-content" class="hidden"></div>
+  </div>
+
+  <footer>
+    <p>中华文明 · 历史发展年鉴（多视角版）| 以多维视角探寻文明脉络</p>
+  </footer>
+</div>
+
+<script>
+// ============ 历史数据定义 ============
+const historicalData = [
+  {
+    id: 'ancient',
+    name: '远古时代',
+    years: '约170万年前—约前2070年',
+    capital: '—',
+    keyFigures: '炎帝、黄帝、尧、舜、禹',
+    group: '远古',
+    color: '#8a7a5a',
+    dotClass: 'prehistoric',
+    perspectives: [
+      {
+        id: 'ancient-1',
+        title: '神话与文明起源——炎黄传说的历史编码',
+        type: '文化思想视角',
+        guide: '在神话的薄雾中，隐藏着先民对文明起源的最初记忆。',
+        tags: ['炎黄', '神话', '文明起源'],
+        iconType: 'culture',
+        content: '炎黄传说不仅仅是浪漫的神话故事，更是中华民族对文明起源的集体记忆编码。黄帝"修德振兵"、炎帝"尝百草教农耕"，这些叙事背后折射的是新石器时代晚期至青铜时代早期，华夏大地上部落联盟向早期国家形态演进的深刻变革。阪泉之战与涿鹿之战的传说，实质上是农耕文明与游牧文明、不同文化共同体之间碰撞与融合的历史投影。从考古学角度看，仰韶文化、龙山文化、良渚文化等考古遗址的发现，为这些传说提供了物质文化的参照系。中华文明"多元一体"的起源格局，正从这些遥远的神话记忆中徐徐展开。',
+        significance: '炎黄传说构成中华民族文化认同的原始符号，是理解中华文明多元一体起源的关键密码。',
+        inspiration: '神话是历史的童年记忆——在文字诞生之前，先民以口耳相传的方式保存了对文明曙光的最初认知。',
+        related: ['仰韶文化彩陶', '龙山文化城址', '良渚古城遗址', '阪泉之战', '涿鹿之战']
+      },
+      {
+        id: 'ancient-2',
+        title: '从仰韶彩陶看原始艺术与信仰',
+        type: '考古视角',
+        guide: '七千年前的彩陶纹样，是先民精神世界的无声诉说。',
+        tags: ['仰韶文化', '彩陶', '原始艺术'],
+        iconType: 'archaeology',
+        content: '仰韶文化（约前5000—前3000年）的彩陶是中国史前艺术的高峰。彩陶上的人面鱼纹、花瓣纹、几何纹等，不仅是装饰，更是原始信仰和宇宙观的载体。半坡遗址出土的人面鱼纹彩陶盆，将人面与鱼形巧妙结合，可能反映了图腾崇拜或巫术仪式。这些纹样展现出先民对自然、生命、死亡的思考——他们已将天地万物的运行纳入一套朴素而完整的解释体系。彩陶的分布范围横跨黄河中上游，表明当时已存在广泛的文化交流网络，奠定了后来华夏文明的空间基础。',
+        significance: '仰韶彩陶是解读先民精神世界最直观的窗口，展示了艺术与信仰在文明萌芽期的深度交织。',
+        inspiration: '原始艺术并非"原始"——它蕴含着先民对宇宙人生的深邃思考，是人类精神觉醒的最早形态。',
+        related: ['半坡遗址', '人面鱼纹盆', '庙底沟彩陶', '马家窑文化']
+      },
+      {
+        id: 'ancient-3',
+        title: '禅让制的理想——尧舜禹的权力传承',
+        type: '政治制度视角',
+        guide: '"天下为公"的政治理想，在部落联盟时代曾真实存在过吗？',
+        tags: ['禅让', '尧舜禹', '政治起源'],
+        iconType: 'politics',
+        content: '尧舜禹的"禅让"故事是中国政治思想史上的核心原型。《尚书》和《史记》记载，尧传舜、舜传禹，皆因德行而非血缘。这一叙事在后世儒家手中被反复阐释，成为"天下为公"理想的经典表述。然而，从历史学角度看，禅让制更可能反映了部落联盟时代首领由各部推举产生的遗风——早期国家尚未形成严密的世袭制度，领导权在部落联盟会议中协商产生。这一制度传统在夏朝建立后被"家天下"的世袭制取代，但"禅让"作为政治理想，始终是后世批判君主专制的重要思想资源。',
+        significance: '禅让传说形塑了中国政治文化中"德治"与"天下为公"的理想范式，影响贯穿整个帝制时代。',
+        inspiration: '理想的政治传统即使不完全真实，也能成为照亮现实的灯塔——禅让理想在中国历史上不断被唤醒，成为变革的精神动力。',
+        related: ['尧舜禅让', '大禹治水', '夏启继位', '家天下制度确立']
+      }
+    ]
+  },
+  {
+    id: 'xia',
+    name: '夏朝',
+    years: '约前2070—约前1600年',
+    capital: '阳城（今河南登封一带）',
+    keyFigures: '禹、启、桀',
+    group: '先秦',
+    color: '#a08040',
+    dotClass: 'early-dynasties',
+    perspectives: [
+      {
+        id: 'xia-1',
+        title: '从禅让到世袭——"家天下"的开端',
+        type: '政治制度视角',
+        guide: '启继禹位，终结了部落联盟的推举传统，开启了四千年的王朝世袭。',
+        tags: ['世袭制', '启', '家天下'],
+        iconType: 'politics',
+        content: '夏朝的建立，最重大的制度变革莫过于从"禅让"转向"世袭"。大禹之后，其子启打破传统，以武力击败法定继承人伯益，登上王位。"公天下"变为"家天下"，这一转折不仅是权力传承方式的变化，更标志着早期国家形态的成熟——行政体系、赋税制度、官僚机构的雏形开始出现。启的"钧台之享"（召集天下诸侯会盟）则是对新秩序的宣告。世袭制虽然在后世被视为专制之源，但在当时的历史条件下，它保障了政治权力的稳定传递，为中国早期文明的持续发展提供了制度框架。',
+        significance: '世袭制的确立是早期国家政治制度化的里程碑，标志着政治权力从个人威望型向制度化继承型的转变。',
+        inspiration: '制度的变革往往充满争议，但回顾历史，每一次深刻的制度转型都是文明演进中不可或缺的一环。',
+        related: ['禹传启', '钧台之享', '伯益失位', '世袭制确立']
+      },
+      {
+        id: 'xia-2',
+        title: '二里头遗址——夏文化的考古之辨',
+        type: '考古视角',
+        guide: '二里头的宫殿基址与青铜作坊，是否为夏朝都城提供了实物证据？',
+        tags: ['二里头', '考古', '夏文化'],
+        iconType: 'archaeology',
+        content: '二里头遗址（约前1900—前1500年）位于河南偃师，是迄今为止发现的中国最早的具有明确规划的大型都邑遗址。遗址中已发现宫殿基址、青铜冶铸作坊、大型墓葬及礼仪建筑，显示出高度复杂的社会组织和等级制度。学术界对二里头是否属于夏文化存在持续争议——部分学者认为其一至四期全属夏文化，另有学者主张后段已进入早商时期。无论归属如何，二里头的考古发现不可否认地表明，在商朝之前的中原地区确已存在发达的青铜时代文明。这为"夏朝"从传说走向信史提供了最关键的考古支撑。',
+        significance: '二里头遗址是解开夏朝历史之谜的钥匙，其考古成果不断重塑着学界对早期中国的认知。',
+        inspiration: '考古学是历史的"沉默证人"——即使文献记载模糊，大地之下埋藏的遗迹和遗物仍在诉说着真实的过往。',
+        related: ['二里头宫殿基址', '绿松石龙形器', '青铜爵', '夏商周断代工程']
+      }
+    ]
+  },
+  {
+    id: 'shang',
+    name: '商朝',
+    years: '约前1600—约前1046年',
+    capital: '殷（今河南安阳）',
+    keyFigures: '汤、盘庚、武丁、妇好、纣',
+    group: '先秦',
+    color: '#a08040',
+    dotClass: 'early-dynasties',
+    perspectives: [
+      {
+        id: 'shang-1',
+        title: '甲骨文里的王朝日常',
+        type: '文字视角',
+        guide: '一片片龟甲兽骨之上，刻写着三千年前商王最关心的事情。',
+        tags: ['甲骨文', '殷墟', '文字起源'],
+        iconType: 'culture',
+        content: '甲骨文的发现（1899年，王懿荣）彻底改变了人们对商朝的认识。殷墟出土的十余万片甲骨，记录了商王对祭祀、征伐、田猎、气象、疾病等事务的占卜。从中可以还原商朝政治运作的核心机制——"国之大事，在祀与戎"：商王几乎事事占卜，通过解读甲骨裂纹来获取先祖和神灵的旨意，以此构建统治的合法性。甲骨文同时也是中国已知最早的系统文字，其象形、指事、会意、形声四种造字法则已完全成熟，直接奠定了汉字的基本形态。每一片甲骨都是一个微缩的历史切片，汇集起来便是一部商朝社会生活的百科全书。',
+        significance: '甲骨文是中国信史的开端，将可靠文字记载的历史上溯到三千三百年前。',
+        inspiration: '文字是人类文明最伟大的发明——文字诞生之前是史前，有了文字就有了"历史"，文明因此获得了记忆和反思的能力。',
+        related: ['殷墟发掘', '王懿荣识甲骨', '武丁卜辞', '甲骨四堂']
+      },
+      {
+        id: 'shang-2',
+        title: '青铜礼器与祭祀——神权政治的物质表达',
+        type: '信仰视角',
+        guide: '司母戊鼎的雄浑与饕餮纹的神秘，诉说着商人对天地神明的敬畏。',
+        tags: ['青铜器', '祭祀', '神权'],
+        iconType: 'religion',
+        content: '商朝是中国青铜文明的鼎盛期。后母戊鼎（原称司母戊鼎）重达832.84公斤，是已知最重的青铜器，其铸造需数百人协同、精密分工，彰显出商朝强大的社会组织能力和王权威严。青铜礼器上的饕餮纹、夔龙纹等神秘纹样，绝非单纯的装饰——它们是沟通天地人神的媒介，是神权政治的物质表达。商王既是政治首领，也是最高祭司，通过垄断祭祀权和青铜礼器的生产，构建了一套"祭政合一"的统治体系。这一神权传统深刻影响了后世中国的政治文化——"礼乐征伐自天子出"的观念即由此发端。',
+        significance: '商代青铜礼器是神权与政权结合的标志性产物，体现了早期国家以宗教权力维系政治秩序的模式。',
+        inspiration: '权力的合法性需要通过文化和符号来建构——商人的青铜重器，是最早的"国家形象工程"。',
+        related: ['后母戊鼎', '饕餮纹', '人殉制度', '祭祀坑']
+      }
+    ]
+  },
+  {
+    id: 'western-zhou',
+    name: '西周',
+    years: '约前1046—前771年',
+    capital: '镐京（今陕西西安）',
+    keyFigures: '周文王、周武王、周公旦、周幽王',
+    group: '先秦',
+    color: '#a08040',
+    dotClass: 'early-dynasties',
+    perspectives: [
+      {
+        id: 'wzhou-1',
+        title: '周公制礼作乐——华夏的文化基因',
+        type: '礼乐制度视角',
+        guide: '一套规范从祭祀到宴饮的礼仪体系，如何塑造了三千年的文化性格？',
+        tags: ['周公', '礼乐', '宗法'],
+        iconType: 'culture',
+        content: '周公旦制礼作乐是中国文化史上最具深远影响的事件之一。武王克商后不久去世，周公摄政，平定"三监之乱"后，进行了大规模的制度创设：以血缘为纽带建立宗法制，以嫡长子继承为核心规范权力传承；以分封制将周室子弟和功臣分封各地，形成"天下共主"的治理格局；以"礼"规范社会各阶层的言行举止，以"乐"调和人心。这套"礼乐文明"体系的核心逻辑是"亲亲尊尊"——通过血缘亲情维系宗族团结，通过等级秩序保持社会稳定。孔子毕生推崇"周礼"，视其为理想社会的蓝本，周公也因此被尊为儒家的"元圣"。',
+        significance: '礼乐文明奠定了中国传统社会以伦理为本位、以和谐为追求的文明底色。',
+        inspiration: '一个社会的长治久安，不仅需要法律的外在约束，更需要礼乐的内在涵化——制度可以强制行为，唯有文化才能塑造心灵。',
+        related: ['武王伐纣', '三监之乱', '分封制', '嫡长子继承制']
+      },
+      {
+        id: 'wzhou-2',
+        title: '分封制的天下治理逻辑',
+        type: '政治制度视角',
+        guide: '"封建亲戚，以藩屏周"——用血缘网络编织起一个横跨千里的政治共同体。',
+        tags: ['分封制', '宗法制', '天下共主'],
+        iconType: 'politics',
+        content: '西周的分封制是中国历史上最早的大规模"联邦式"政治实践。周天子将土地和人民分封给子弟、功臣及前朝后裔，受封诸侯在封国内享有世袭统治权，但同时需向天子履行朝觐、纳贡、从征等义务。"封建亲戚，以藩屏周"——这套制度以宗法血缘为纽带，在当时的交通和通讯条件下，实现了对广阔疆域的有效治理。然而，随着血缘关系的代际疏远和诸侯实力的增长，分封制的内在矛盾逐渐显现。西周末年，诸侯坐大，"礼乐征伐自诸侯出"，最终走向春秋战国的分裂争霸。',
+        significance: '分封制是早期国家在有限技术条件下进行大规模疆域治理的制度创新，其兴衰揭示出"间接统治"模式的优势与隐忧。',
+        inspiration: '制度设计必须随时间演进而调整——再精妙的制度，如果无法适应环境和力量格局的变化，终将走向反面。',
+        related: ['牧野之战', '周初大分封', '井田制', '国人暴动']
+      }
+    ]
+  },
+  {
+    id: 'spring-autumn',
+    name: '春秋',
+    years: '前770—前476年',
+    capital: '洛邑（东周都城）',
+    keyFigures: '孔子、老子、齐桓公、晋文公、管仲',
+    group: '先秦',
+    color: '#a08040',
+    dotClass: 'early-dynasties',
+    perspectives: [
+      {
+        id: 'spring-1',
+        title: '孔子与百家争鸣的萌芽',
+        type: '文化思想视角',
+        guide: '一个礼崩乐坏的乱世，为何成为中华思想史上最辉煌的时代？',
+        tags: ['孔子', '老子', '百家争鸣'],
+        iconType: 'culture',
+        content: '春秋时代王室衰微、诸侯争霸，旧的礼乐秩序土崩瓦解，反而催生出了空前活跃的思想创造。孔子（前551—前479）在鲁国创办私学，打破"学在官府"的垄断，以"仁"和"礼"为核心建立儒家学说，提倡"有教无类"，整理《诗》《书》《礼》《乐》《易》《春秋》六经。同时代的老子（传为李耳）则提出了"道法自然""无为而治"的道家思想，为中国哲学开辟了另一种可能。儒道两家在春秋末年的相继出现，标志着中国思想从宗教神权走向人文理性的伟大转折，也为接下来战国百家争鸣的黄金时代拉开了序幕。',
+        significance: '孔子开创的儒家学说和老子开创的道家学说，构成中国思想史的两大源流，影响贯穿两千余年。',
+        inspiration: '思想的繁荣往往不生于安逸太平，而出于动荡变革——秩序的解体释放了人们重新思考世界和人生的巨大能量。',
+        related: ['孔子周游列国', '老子出关', '管仲改革', '晏子使楚']
+      },
+      {
+        id: 'spring-2',
+        title: '争霸战争与兵家谋略——春秋军事地理',
+        type: '军事地理视角',
+        guide: '城濮之战、邲之战……每场大战背后都是复杂的地缘博弈。',
+        tags: ['争霸', '军事', '地缘'],
+        iconType: 'military',
+        content: '春秋时代以"五霸"更替为主线的争霸战争，深刻塑造了中国政治地理的基本格局。齐桓公"尊王攘夷"，以会盟而非征服维持霸权；晋楚城濮之战（前632年）中，晋文公"退避三舍"而后大胜，奠定了晋国百年霸业；楚庄王问鼎中原，邲之战（前597年）一举击溃晋军，楚国势力达到顶峰。这些战争不再是简单的领土吞并，而是围绕"霸主"地位的复杂地缘博弈——交战双方往往通过外交联盟、分化瓦解、心理威慑等多重手段进行较量。孙武的《孙子兵法》正是在这一深厚的战争实践基础上，提炼出"兵者诡道也""不战而屈人之兵"等超越时代的战略思想。',
+        significance: '春秋争霸战争催生了中国古典军事思想的成熟，也是早期地缘政治智慧的大熔炉。',
+        inspiration: '真正的战略不在于赢得每一场战斗，而在于塑造有利于己的大势——二千五百年前的兵家智慧，至今仍在影响着世界的博弈之道。',
+        related: ['城濮之战', '邲之战', '孙子兵法', '管仲治齐']
+      }
+    ]
+  },
+  {
+    id: 'warring-states',
+    name: '战国',
+    years: '前475—前221年',
+    capital: '各国都城（临淄、咸阳、邯郸等）',
+    keyFigures: '商鞅、孟子、庄子、屈原、韩非、李冰',
+    group: '先秦',
+    color: '#a08040',
+    dotClass: 'early-dynasties',
+    perspectives: [
+      {
+        id: 'warring-1',
+        title: '商鞅变法——秦国的全面改造',
+        type: '改革视角',
+        guide: '一个西陲弱国通过一场激进改革，如何成为统一天下的战争机器？',
+        tags: ['商鞅', '变法', '法家'],
+        iconType: 'politics',
+        content: '商鞅变法（前356年、前350年两轮）是中国古代最彻底、最成功的制度变革之一。商鞅在秦孝公支持下，废井田、开阡陌，实行土地私有制，释放了农业生产力；推行县制，强化中央对地方的直接控制；建立二十等军功爵制，打破世卿世禄，让平民通过战场杀敌即可获得爵位；实行什伍连坐法和严酷刑罚，将整个秦国打造成一部高效的"战争机器"。变法的结果惊人：秦国从一个被中原诸侯轻视的"戎狄之邦"，迅速崛起为战国七雄中最强大的力量。虽然后来商鞅被车裂，但其制度遗产为秦国统一天下奠定了坚实基础。',
+        significance: '商鞅变法是法家思想最彻底的实践，证明了制度变革可以根本性地改变一个国家的命运。',
+        inspiration: '改革需要勇气、智慧和决心——商鞅以个人的悲剧换来了秦国的崛起，伟大的变革往往需要巨大的代价。',
+        related: ['秦孝公求贤', '徙木立信', '军功爵制', '什伍连坐']
+      },
+      {
+        id: 'warring-2',
+        title: '都江堰——水利与农业文明',
+        type: '科技发明视角',
+        guide: '一座两千多年前的水利工程，至今仍在灌溉着成都平原的千里沃野。',
+        tags: ['都江堰', '李冰', '水利'],
+        iconType: 'technology',
+        content: '都江堰（约前256年建成）是战国时期最伟大的工程技术成就之一。秦国蜀守李冰主持修建的这一水利工程，巧妙地利用岷江出山口的自然地形，通过"鱼嘴"分水、"飞沙堰"溢洪、"宝瓶口"引水三大工程，实现了无坝引水和自动排沙的完美结合。两千余年来，都江堰持续发挥着灌溉、防洪、航运的综合效益，使成都平原成为"水旱从人、不知饥馑"的天府之国。其"乘势利导、因时制宜"的设计理念，体现了中国古人"天人合一"的工程哲学——不是征服自然，而是顺应自然。都江堰至今仍灌溉着超过一千万亩农田，是活的"水利博物馆"。',
+        significance: '都江堰是人与自然和谐共生的工程典范，证明可持续的基础设施可以延续千年而功效不减。',
+        inspiration: '最伟大的工程不是与自然对抗，而是与自然合作——都江堰的低调与持久，胜过无数高调而短命的技术奇迹。',
+        related: ['郑国渠', '灵渠', '李冰治水', '天府之国']
+      }
+    ]
+  },
+  {
+    id: 'qin',
+    name: '秦朝',
+    years: '前221—前206年',
+    capital: '咸阳（今陕西咸阳）',
+    keyFigures: '秦始皇嬴政、李斯、蒙恬、扶苏',
+    group: '秦汉',
+    color: '#c94f3a',
+    dotClass: 'qin-han',
+    perspectives: [
+      {
+        id: 'qin-1',
+        title: '书同文车同轨——大一统的标准化运动',
+        type: '政治制度视角',
+        guide: '一个前所未有的庞大帝国，如何用统一的标准将六国的"异"变为天下的"同"？',
+        tags: ['大一统', '标准化', '秦始皇'],
+        iconType: 'politics',
+        content: '秦始皇统一六国后推行的标准化政策，是中国历史上规模最大、影响最深远的社会改造工程。"书同文"——以小篆（后简化为隶书）统一六国文字，消除了关东各国文字差异造成的文化隔阂；"车同轨"——统一车轨宽度和驰道标准，构建了以咸阳为中心的全国交通网；此外还有统一度量衡、统一货币（半两钱）、统一法律等。这一系列标准化措施的本质，是将一个由多元文化、多元制度组成的"天下"改造为一个统一的、可治理的帝国。虽然秦朝仅存在15年，但其开创的大一统制度框架——郡县制、标准化、中央集权——成为此后两千年中国政治的基本模式。',
+        significance: '标准化是大一统帝国的制度基础，秦朝的实践奠定了中华文明"书同文"的文化统一体。',
+        inspiration: '统一不仅仅是军事征服——真正的统一在于让不同地域的人读同样的文字、用同样的度量、遵循同样的规则。',
+        related: ['小篆推广', '郡县制确立', '驰道修建', '半两钱统一']
+      },
+      {
+        id: 'qin-2',
+        title: '简牍之上的帝国——从云梦秦简看秦朝律法',
+        type: '法治视角',
+        guide: '一块块竹简上密密麻麻的法律条文，还原了一个以法治国的"刚性帝国"。',
+        tags: ['秦律', '云梦秦简', '法家'],
+        iconType: 'politics',
+        content: '1975年湖北云梦睡虎地出土的秦简，为世人揭开了一个细节惊人的秦朝法律世界。这批秦简抄录于秦统一前夕，内容涵盖《田律》《厩苑律》《仓律》《金布律》《工律》《均工律》等十八种法律，涉及农业管理、畜牧业、仓库管理、货币流通、手工业生产等社会经济的每一个角落。秦律的精细程度令人叹为观止——例如规定田间每亩播种量、牛的喂养标准、仓库防鼠措施等。这种"以法治国"的模式以严密的规则体系取代了战国以前的礼俗和人治传统，是国家治理理性化的重要突破。然而，过度严苛和缺乏弹性也成为秦朝速亡的重要原因。',
+        significance: '云梦秦简揭示了中国早期法治实践的面貌，为理解法家思想的现实运作提供了第一手资料。',
+        inspiration: '法律的力量不在于严酷，而在于合理与可持续——秦朝以"法治"立国，终因"苛法"而亡，这一教训值得永远铭记。',
+        related: ['睡虎地秦简', '焚书坑儒', '李斯变法', '陈胜吴广起义']
+      }
+    ]
+  },
+  {
+    id: 'western-han',
+    name: '西汉',
+    years: '前202—9年',
+    capital: '长安（今陕西西安）',
+    keyFigures: '刘邦、汉武帝刘彻、张骞、司马迁、卫青、霍去病',
+    group: '秦汉',
+    color: '#c94f3a',
+    dotClass: 'qin-han',
+    perspectives: [
+      {
+        id: 'whan-1',
+        title: '张骞通西域——"凿空"丝绸之路',
+        type: '对外交流视角',
+        guide: '一位使者的孤勇远征，意外地连接起东西方两大文明世界。',
+        tags: ['张骞', '丝绸之路', '西域'],
+        iconType: 'diplomacy',
+        content: '汉武帝建元三年（前138年），张骞奉命出使西域，寻求与大月氏结盟夹击匈奴。他历经十三年的艰辛——被匈奴囚禁十年、穿越沙漠戈壁、抵达大宛和大月氏——虽然军事联盟的目标未能达成，却带回了关于西域和中亚各国前所未有的地理情报。前119年，张骞再次出使，汉朝与西域诸国正式建立联系。司马迁称之为"凿空"——凿开了中原通往西方的通道。此后，中国的丝绸、漆器、冶铁技术沿这条通道西传，西域的葡萄、胡桃、苜蓿、佛教等也由此进入中国。丝绸之路不仅是一条贸易路线，更是文明交流的大动脉，深刻影响了欧亚大陆的历史进程。',
+        significance: '张骞凿空西域是全球化早期的标志性事件，丝绸之路由此成为连接东西方文明最持久的纽带。',
+        inspiration: '历史的开创常常源于"失败"——张骞的军事使命没有达成，但他带回的地理知识却改变了世界的格局。',
+        related: ['河西走廊', '汗血宝马', '佛教东传', '西域都护府']
+      },
+      {
+        id: 'whan-2',
+        title: '司马迁与《史记》——史学的独立宣言',
+        type: '文化思想视角',
+        guide: '在遭受宫刑的屈辱中，一位史官用自己的血泪铸就了中国史学的万世基石。',
+        tags: ['司马迁', '史记', '史学'],
+        iconType: 'culture',
+        content: '司马迁（约前145—约前87年）的《史记》是中国第一部纪传体通史，也是世界史学的经典巨著。全书130篇、52万余字，上起黄帝、下至汉武，以"本纪""世家""列传""书""表"五体结构，构建了一个宏大而严整的历史叙事体系。司马迁的伟大不仅在于"网罗天下放失旧闻"的博学，更在于其"究天人之际，通古今之变，成一家之言"的史学追求。他为李陵辩护而遭宫刑，在巨大屈辱中坚持完成《史记》，在书中对当权者汉武帝不乏隐晦的批评，对失败的英雄（如项羽、陈涉）给予了深切同情。这种不屈服于权力的独立史识，使《史记》超越了一般官修史书的局限，成为真正的"史家之绝唱"。',
+        significance: '《史记》开创了中国史学纪传体传统，树立了"不虚美、不隐恶"的史家精神标杆。',
+        inspiration: '真正的史学不是权力的注脚，而是良心的记录——司马迁以个人的苦难换取了对历史真实的忠诚。',
+        related: ['李陵之祸', '太史公书', '纪传体', '班固汉书']
+      }
+    ]
+  },
+  {
+    id: 'eastern-han',
+    name: '东汉',
+    years: '25—220年',
+    capital: '洛阳（今河南洛阳）',
+    keyFigures: '刘秀、蔡伦、张衡、张仲景',
+    group: '秦汉',
+    color: '#c94f3a',
+    dotClass: 'qin-han',
+    perspectives: [
+      {
+        id: 'ehan-1',
+        title: '蔡伦造纸——文明传播的载体革命',
+        type: '科技发明视角',
+        guide: '一张轻薄的纸，彻底改变了人类知识传承的方式。',
+        tags: ['蔡伦', '造纸术', '四大发明'],
+        iconType: 'technology',
+        content: '元兴元年（105年），蔡伦总结前人经验，改进造纸工艺，用树皮、麻头、破布、旧渔网等为原料，制造出轻便柔韧、适用于书写的纸张——"蔡侯纸"。在此之前，中国主要使用竹简（笨重）和缣帛（昂贵）作为书写材料，知识的传播受到严重限制。纸张的普及使书籍的制作成本大幅降低，知识从贵族和官府的垄断中走向更广泛的社会阶层，直接推动了东汉魏晋时期文化的大繁荣。造纸术后来沿丝绸之路西传至阿拉伯和欧洲，被公认为人类文明史上最重要的发明之一，深刻影响了世界文明的进程。',
+        significance: '造纸术使知识获得了廉价而便捷的物质载体，是人类信息传播史上的第一次重大革命。',
+        inspiration: '一项技术看似简单，但如果它触及了文明传播的根本瓶颈（信息载体的成本），便能够改变世界。',
+        related: ['简牍', '帛书', '四大发明', '造纸术西传']
+      },
+      {
+        id: 'ehan-2',
+        title: '张仲景与《伤寒杂病论》——医圣的仁心',
+        type: '科技发明视角',
+        guide: '一场席卷全国的瘟疫，催生了一部影响中医两千年至今仍在应用的经典。',
+        tags: ['张仲景', '中医', '伤寒论'],
+        iconType: 'technology',
+        content: '东汉末年战乱频仍，瘟疫反复流行，张仲景家族二百余口在十年间死亡三分之二，其中七成死于伤寒。巨大的悲痛驱动他"勤求古训，博采众方"，著成《伤寒杂病论》（后分为《伤寒论》和《金匮要略》）。这部著作首次建立了中医"辨证论治"的理论体系——通过"六经辨证"诊断疾病，根据病情的表里、寒热、虚实确定治疗原则，实现了从经验用药到系统诊疗的飞跃。《伤寒论》中的方剂如麻黄汤、桂枝汤、小柴胡汤等，至今仍广泛应用于临床，其"理、法、方、药"一体化的思维模式，成为中医最具特色的治疗范式。',
+        significance: '《伤寒杂病论》奠定了中医辨证论治的理论基础，是中医从经验医学走向理性医学的里程碑。',
+        inspiration: '灾难中诞生的医学智慧，以仁心和理性拯救了无数生命——张仲景的"医圣"之名，是人民给予的最高褒奖。',
+        related: ['六经辨证', '华佗', '五禽戏', '汉代疫病']
+      }
+    ]
+  },
+  {
+    id: 'three-kingdoms',
+    name: '三国',
+    years: '220—280年',
+    capital: '魏·洛阳 / 蜀·成都 / 吴·建业',
+    keyFigures: '曹操、刘备、孙权、诸葛亮、周瑜、关羽',
+    group: '魏晋南北朝',
+    color: '#6b8a8a',
+    dotClass: 'division',
+    perspectives: [
+      {
+        id: 'tk-1',
+        title: '赤壁之战——以少胜多的战略博弈',
+        type: '军事地理视角',
+        guide: '一场改变中国历史走向的大火，如何在大江之上燃烧起来？',
+        tags: ['赤壁之战', '三国', '军事谋略'],
+        iconType: 'military',
+        content: '建安十三年（208年）的赤壁之战是三国鼎立格局形成的关键战役。曹操率号称八十万大军南下，欲一举统一江南。孙刘联军仅约五万人在赤壁（今湖北赤壁市）与曹军隔江对峙。周瑜、诸葛亮等人充分利用曹军远来疲惫、不习水战、疫病流行等弱点，以火攻奇袭曹军水寨——东南风起，火借风势，曹军战船连成一片顷刻间化为火海。赤壁之战的本质是以地利补兵力之不足、以智谋克强敌的经典范例。曹操败退北方后，三国鼎立的态势基本定型，中国的统一因此推迟了七十余年。这场战役的传奇色彩经《三国演义》的文学渲染，成为中国军事史上最脍炙人口的篇章。',
+        significance: '赤壁之战证明，在战争中，地利、气候、士气、指挥等"软要素"可以转化为决定性的优势。',
+        inspiration: '强弱是相对的——弱势一方如能巧妙利用环境和对手的弱点，同样可以逆转乾坤。',
+        related: ['官渡之战', '夷陵之战', '周瑜', '诸葛亮隆中对']
+      },
+      {
+        id: 'tk-2',
+        title: '三顾茅庐——求贤之道的千年佳话',
+        type: '关键人物视角',
+        guide: '刘备三次登门拜访一个二十七岁的隐士，换来了"隆中对"的天下蓝图。',
+        tags: ['诸葛亮', '刘备', '人才'],
+        iconType: 'figure',
+        content: '刘备三顾茅庐（207年）请诸葛亮出山，是中国历史上最著名的求贤故事。此时的刘备已年近半百，征战半生却无立锥之地；而诸葛亮不过是一个在隆中躬耕的二十七岁青年。然而刘备以皇叔之尊三次登门拜访，其谦恭和诚意最终打动了这位"卧龙"。诸葛亮以"隆中对"为刘备规划了三分天下的战略蓝图——先取荆州为家，再图益州，待天下有变则两路北伐。这一战略尽管因关羽失荆州而未能完全实现，但"三顾茅庐"的佳话本身已成为中国人才文化中最宝贵的遗产——它告诉后世：真正的人才需要尊重和诚意才能获得，领导者放下身段、虚怀若谷，才能汇聚天下英才。',
+        significance: '三顾茅庐是中国人才文化中最经典的符号，体现了"尊贤重士"的人才价值观。',
+        inspiration: '真正的领导力不在于高高在上，而在于以诚心打动人才、以信任成就人才——三顾茅庐之所以流传千古，正是因为它击中了人才管理的核心命题。',
+        related: ['隆中对', '出师表', '白帝城托孤', '鞠躬尽瘁']
+      }
+    ]
+  },
+  {
+    id: 'western-jin',
+    name: '西晋',
+    years: '265—316年',
+    capital: '洛阳（今河南洛阳）',
+    keyFigures: '司马炎、杜预、王濬、陆机',
+    group: '魏晋南北朝',
+    color: '#6b8a8a',
+    dotClass: 'division',
+    perspectives: [
+      {
+        id: 'wjin-1',
+        title: '士族门阀的兴起——从九品中正制到"上品无寒门"',
+        type: '社会视角',
+        guide: '一个人才选拔制度，如何在不到半个世纪内沦为门阀垄断政治的工具？',
+        tags: ['士族', '九品中正制', '门阀'],
+        iconType: 'society',
+        content: '曹魏创立的九品中正制，本意是由中正官根据人才的行状和品第来选拔官员。然而到西晋时，中正官本身即为士族把持，品评标准从"才能"逐渐变质为"门第"——高门大族子弟即便无才无德也能获得"上品"评级，而寒门士子则被压制在下品。"上品无寒门，下品无士族"成为西晋政治生态的真实写照。豪门如琅琊王氏、陈郡谢氏、太原王氏等，世代占据高位，形成了中国历史上第一个成熟的士族门阀社会。这种僵化的社会结构阻塞了社会流动，也使西晋政治日益奢靡腐败，短短五十年即因"八王之乱"和五胡入侵而灭亡。',
+        significance: '九品中正制的异化过程揭示了一个普遍规律：任何选才制度都可能被既得利益者扭曲为维护自身特权的工具。',
+        inspiration: '社会流动性的丧失是王朝衰败的深层病因——当一个社会不能让有才能的人上升时，这个社会的活力就已经枯竭。',
+        related: ['九品中正制', '八王之乱', '门阀政治', '司马炎统一']
+      },
+      {
+        id: 'wjin-2',
+        title: '三家归晋——短暂统一的历史意义',
+        type: '统一视角',
+        guide: '汉末分裂近百年后，三家终归一统，但这统一为何像昙花般短暂？',
+        tags: ['统一', '三家归晋', '八王之乱'],
+        iconType: 'politics',
+        content: '263年魏灭蜀，265年司马炎代魏建晋，280年晋灭吴——"三家归晋"终于终结了自黄巾起义以来近一个世纪的分裂局面。统一全国后，西晋初期出现了"太康之治"的短暂繁荣，人口恢复增长，经济趋向活跃。然而，这一统一的根基极为脆弱：司马炎大封宗室为王并赋予兵权，为"八王之乱"（291—306年）埋下了祸根；同时，大量内迁的游牧民族（"五胡"）在华北地区聚居，民族矛盾日趋尖锐；士族门阀耽于奢侈清谈，丧失了治理能力。316年，匈奴刘曜攻破长安，西晋仅维持了短短半个世纪的统一便告覆亡。这一历史教训说明：政治统一若无制度保障和社会整合作为支撑，终将脆弱难持。',
+        significance: '西晋的统一与速亡是中国历史上关于"统一脆弱性"最经典的案例。',
+        inspiration: '统一不是终点，而是一个需要持续经营的过程——没有制度保障和民心认同的统一，不过是暂时的军事征服。',
+        related: ['太康之治', '八王之乱', '永嘉之乱', '衣冠南渡']
+      }
+    ]
+  },
+  {
+    id: 'eastern-jin',
+    name: '东晋十六国',
+    years: '317—420年',
+    capital: '建康（今江苏南京）',
+    keyFigures: '司马睿、王导、谢安、王羲之、苻坚',
+    group: '魏晋南北朝',
+    color: '#6b8a8a',
+    dotClass: 'division',
+    perspectives: [
+      {
+        id: 'ejin-1',
+        title: '五胡内迁与民族大融合',
+        type: '民族融合视角',
+        guide: '"五胡乱华"是一段血与火的历史，但其背后却是一场深刻的民族大融合。',
+        tags: ['五胡', '民族融合', '衣冠南渡'],
+        iconType: 'society',
+        content: '东汉以来，匈奴、鲜卑、羯、氐、羌等游牧民族持续内迁至华北地区，到西晋时已形成"关中之人百余万口，戎狄居半"的局面。西晋末年政治崩溃后，各胡族纷纷建立政权——匈奴刘渊建汉、羯人石勒建后赵、鲜卑慕容氏建前燕、氐人苻坚建前秦……史称"五胡十六国"。这是一个充满战乱和苦难的时代，但也是中国历史上规模最大的民族融合进程之一。在长达一个多世纪的混战和共生中，胡汉之间在语言、习俗、制度、血缘上不断交融——前秦苻坚重用汉臣王猛推行汉制、北魏拓跋氏后来全面汉化，都是这一大融合的延续。隋唐时代开放包容的气象，正是这一漫长民族融合的历史遗产。',
+        significance: '五胡十六国时期的民族大融合，为隋唐统一多民族国家的形成奠定了人口和文化基础。',
+        inspiration: '民族融合的过程往往是痛苦的，但从长时段来看，不同文明的碰撞和交融恰恰是中华文明保持活力的重要源泉。',
+        related: ['淝水之战', '王与马共天下', '石勒兴赵', '苻坚统一北方']
+      },
+      {
+        id: 'ejin-2',
+        title: '兰亭序——一个时代的精神自由',
+        type: '艺术视角',
+        guide: '一群文人在会稽山阴的曲水流觞中，写下了中国书法最自由的一页。',
+        tags: ['王羲之', '兰亭序', '书法'],
+        iconType: 'culture',
+        content: '永和九年（353年）三月三日，王羲之与谢安、孙绰等四十一人在会稽山阴兰亭举行修禊雅集。曲水流觞之间，众人赋诗抒怀，王羲之微醺之中挥毫作序——这就是被誉为"天下第一行书"的《兰亭序》。全篇324字，笔势遒媚飘逸，字字变化万端，二十余个"之"字无一雷同，达到了心手双畅、天人合一的艺术境界。这一作品不仅是书法艺术的巅峰，更是东晋士人精神世界的缩影——在政治动荡和北土沦丧的背景下，南渡士人寄情山水、放逐心灵，在艺术中寻找精神的自由和生命的超越。',
+        significance: '《兰亭序》是中国书法艺术最伟大的作品之一，代表了士人精神从政治关怀向艺术审美的转向。',
+        inspiration: '艺术在最黑暗的时代常常绽放出最耀眼的光芒——精神自由是人类在任何境遇下都无法被剥夺的最后领地。',
+        related: ['曲水流觞', '王谢家族', '魏晋风度', '书圣']
+      }
+    ]
+  },
+  {
+    id: 'north-south',
+    name: '南北朝',
+    years: '420—589年',
+    capital: '南朝建康 / 北朝平城→洛阳',
+    keyFigures: '北魏孝文帝、祖冲之、刘裕、萧衍',
+    group: '魏晋南北朝',
+    color: '#6b8a8a',
+    dotClass: 'division',
+    perspectives: [
+      {
+        id: 'ns-1',
+        title: '北魏孝文帝汉化改制——鲜卑皇帝的文明选择',
+        type: '改革视角',
+        guide: '一个鲜卑皇帝迁都洛阳、改汉姓、穿汉服——主动融入中原文明的背后是什么？',
+        tags: ['孝文帝', '汉化', '改革'],
+        iconType: 'politics',
+        content: '北魏孝文帝拓跋宏（后改姓元）是中国历史上最具魄力的改革者之一。493年，他不顾鲜卑贵族的激烈反对，将都城从平城（今山西大同）迁至洛阳；随后推行一系列激进的汉化政策：禁鲜卑语、改鲜卑复姓为汉姓（皇族拓跋氏改姓元）、禁胡服而着汉服、鼓励鲜卑贵族与汉族士人通婚、全面采用汉族典章制度。孝文帝的改革用意深远——他要将北魏从一个以军事征服立国的"胡人政权"转型为正统的中原王朝。尽管改革在北魏末年引发了"六镇之乱"的反弹，但长远来看，它为隋唐统一多民族帝国奠定了制度和文化基础。',
+        significance: '孝文帝改革是民族融合和文明交融最自觉、最大胆的政治实践，开创了"以文化认同取代血统认同"的治理模式。',
+        inspiration: '文明的自信不在于排斥异质文化，而在于以融合创造新的可能——一个游牧民族的君主推动全面汉化，本身就是对中华文明包容性的最好证明。',
+        related: ['均田制', '六镇之乱', '龙门石窟', '云冈石窟']
+      },
+      {
+        id: 'ns-2',
+        title: '祖冲之的圆周率——古代数学的巅峰',
+        type: '科技发明视角',
+        guide: '一位南朝数学家将圆周率精确到小数点后七位，这一记录保持了近千年。',
+        tags: ['祖冲之', '圆周率', '数学'],
+        iconType: 'technology',
+        content: '祖冲之（429—500年）是南北朝时期最杰出的科学家。他运用"割圆术"将圆周率（π）精确计算到3.1415926至3.1415927之间，这一精度直到近千年后的15世纪才被阿拉伯数学家打破。他还给出了圆周率的两个分数近似值：约率22/7和密率355/113，后者是分母在16604以内的最佳分数近似。除数学外，祖冲之在天文历法（制定《大明历》）、机械制造（复原指南车、发明水碓磨）等领域均有卓越成就。祖冲之的科学工作在南北朝那个政治分裂的时代显得格外珍贵——它证明了中国古代科学传统在战乱中并未中断，知识仍然在传承和发展。',
+        significance: '祖冲之的圆周率成就代表了中世纪世界数学的最高水平，是中国古代科学精神的杰出体现。',
+        inspiration: '真正的学术成就超越时代和政治——在动荡不安的年代，静心于数学推演的祖冲之，为人类知识宝库增添了永恒的财富。',
+        related: ['割圆术', '大明历', '指南车', '古代数学史']
+      }
+    ]
+  },
+  {
+    id: 'sui',
+    name: '隋朝',
+    years: '581—618年',
+    capital: '大兴城（今陕西西安）',
+    keyFigures: '隋文帝杨坚、隋炀帝杨广、宇文恺',
+    group: '隋唐',
+    color: '#d4a745',
+    dotClass: 'sui-tang',
+    perspectives: [
+      {
+        id: 'sui-1',
+        title: '大运河——横贯南北的千年血脉',
+        type: '工程视角',
+        guide: '世界上最长的古代运河，以数百万民夫的血汗连接起黄河与长江两大流域。',
+        tags: ['大运河', '隋炀帝', '工程'],
+        iconType: 'technology',
+        content: '隋炀帝大业元年（605年）起，隋朝征发数百万劳动力，历时六年开凿以洛阳为中心、北达涿郡（今北京）、南抵余杭（今杭州）的大运河，全长约2700余公里。这条"水上高速公路"将北方政治中心与南方经济重心紧密连接——江南的粮食、丝绸、瓷器通过运河源源不断输送至北方，中原的文化、制度也顺流而下深入江南。大运河的修建代价之巨大也加速了隋朝的崩溃，但它的历史价值远远超越了隋朝本身——此后唐宋元明清各代均赖此为命脉，直至今日京杭大运河仍在发挥航运功能。它是中国古代最宏大的基础设施工程，也是"功在当代、利在千秋"最真实的写照。',
+        significance: '大运河实现了黄河流域和长江流域的经济一体化，是维系中国南北统一的关键基础设施。',
+        inspiration: '伟大的工程往往需要超越一代人的视野——隋炀帝背负了"暴君"的骂名，但大运河作为文明的血脉却流淌了千年。',
+        related: ['永济渠', '通济渠', '邗沟', '江南河']
+      },
+      {
+        id: 'sui-2',
+        title: '科举制的创立——从荐举到考试的变革',
+        type: '政治制度视角',
+        guide: '用考试代替推荐来选拔官员——这一制度的创立改变了中国千年的政治生态。',
+        tags: ['科举制', '进士科', '社会流动'],
+        iconType: 'politics',
+        content: '隋文帝废除九品中正制，隋炀帝大业年间（607年）设置"进士科"，以试策取士，标志着科举制度的正式诞生。在此之前，官员选拔或靠门第（九品中正制），或靠荐举（察举制），实质上被世家大族所垄断。科举制以考试成绩为选拔标准，在理论上向所有社会阶层打开了通往权力和声望的通道——"朝为田舍郎，暮登天子堂"成为可能。尽管科举制在后世也出现了僵化（如八股取士）等弊病，但它无疑是人类历史上最早、最系统化的文官选拔制度之一，对东亚乃至世界（如西方文官制度）产生了深远影响。',
+        significance: '科举制打破了贵族门阀对政治权力的垄断，开创了以知识和才能为标准的官员选拔模式。',
+        inspiration: '选拔人才的方式决定了一个社会的公平与活力——从"拼爹"到"拼才"，科举制度在当时的进步性是不可估量的。',
+        related: ['九品中正制废除', '进士科', '隋文帝改革', '文官制度']
+      }
+    ]
+  },
+  {
+    id: 'tang',
+    name: '唐朝',
+    years: '618—907年',
+    capital: '长安（今陕西西安）',
+    keyFigures: '李世民、武则天、李白、杜甫、玄奘',
+    group: '隋唐',
+    color: '#d4a745',
+    dotClass: 'sui-tang',
+    perspectives: [
+      {
+        id: 'tang-1',
+        title: '李白杜甫的时代气象——唐诗为何无法超越',
+        type: '文化思想视角',
+        guide: '一个时代的精神高度，浓缩在"李杜文章在，光焰万丈长"的诗句之中。',
+        tags: ['唐诗', '李白', '杜甫'],
+        iconType: 'culture',
+        content: '唐诗是中国文学的巅峰，而李白（701—762年）和杜甫（712—770年）则是唐诗天空中最璀璨的双子星。李白的诗充满了道家式的飘逸和自由——"天生我材必有用，千金散尽还复来""飞流直下三千尺，疑是银河落九天"，展现的是盛唐时代个体生命的极度张扬；杜甫的诗则以儒家式的关怀和沉郁记录时代——"朱门酒肉臭，路有冻死骨""安得广厦千万间，大庇天下寒士俱欢颜"，在安史之乱的苦难中发出最深沉的人道呼唤。唐诗的繁荣绝非偶然：科举以诗取士的制度激励、开放包容的社会氛围、多元文化的激荡交融、语言在南北朝以来数百年间的积淀成熟——这些因素共同造就了一个不可复制的诗的时代。',
+        significance: '唐诗是中国文学的最高成就，李杜双峰代表了中国古典诗歌的两种最高范式——浪漫与写实、天才与功力。',
+        inspiration: '伟大的艺术离不开自由而自信的时代精神——盛唐诗人那种"会当凌绝顶"的气概，正是那个开放时代的灵魂回响。',
+        related: ['安史之乱', '科举诗赋', '王维', '白居易']
+      },
+      {
+        id: 'tang-2',
+        title: '武则天——唯一女皇的权力之路',
+        type: '关键人物视角',
+        guide: '一个女子如何在男权社会中登上帝位，并在位十五年将帝国治理得井井有条？',
+        tags: ['武则天', '女皇', '权力'],
+        iconType: 'figure',
+        content: '武则天（624—705年）是中国历史上唯一一位正式称帝的女性。她从太宗才人、高宗皇后一路走到"圣神皇帝"，开创武周政权，成为中国帝制时代最令人惊叹的权力巅峰案例。武则天的成功有多重因素：她个人超凡的政治才智和权谋手段、唐代相对宽松的女性地位环境、以及对佛教转轮圣王信仰的巧妙利用。在位的十五年间，她大力发展科举制、开创殿试和武举、提拔大量寒门人才（如狄仁杰）、推动经济持续发展——"政启开元，治宏贞观"是对她治理成就的准确评价。尽管后世正统史家对她多有贬抑，但历史事实表明，武则天的统治是中国帝制时代一个相当成功的时期。',
+        significance: '武则天打破了帝制时代男性对最高权力的绝对垄断，证明了性别不应成为衡量领导能力的标准。',
+        inspiration: '武则天的故事告诉我们：制度可以限制人，但杰出者可以突破制度的限制——前提是具备与之匹配的才智、毅力和手腕。',
+        related: ['贞观之治', '开元盛世', '无字碑', '狄仁杰']
+      },
+      {
+        id: 'tang-3',
+        title: '遣唐使——汉字文化圈的编织者',
+        type: '对外交流视角',
+        guide: '一批批日本使节冒着生命危险渡海而来，带回的不仅是制度，更是一种文明。',
+        tags: ['遣唐使', '日本', '汉字文化圈'],
+        iconType: 'diplomacy',
+        content: '自630年至894年，日本先后派遣了十九批遣唐使到中国。遣唐使船队横渡东海，每次航程都充满危险——风暴、暗礁、迷航，船毁人亡的概率极高。但日本朝廷仍持续派遣，因为唐朝的制度与文化对于正处于国家形成关键期的日本而言，是一座取之不尽的文明宝库。遣唐使和留学生（如阿倍仲麻吕）将在长安学到的律令制度、建筑技术、文字书法、佛教经典带回日本——日本的大化改新以唐制为蓝本，平城京（奈良）仿长安建造，日本假名借汉字创制。不仅是日本，新罗、渤海、安南（越南）也大量吸收唐文化——一个覆盖东亚的"汉字文化圈"在唐代最终成型。',
+        significance: '遣唐使制度是跨海文明交流史上最壮观的篇章之一，奠定了东亚文化圈至今仍可见的共同文化基因。',
+        inspiration: '文明的影响力不在于武力征服，而在于能否提供令人向往的制度范式和文化魅力——唐朝凭借软实力而非军事扩张塑造了东亚世界。',
+        related: ['鉴真东渡', '阿倍仲麻吕', '大化改新', '汉字文化圈']
+      },
+      {
+        id: 'tang-4',
+        title: '安史之乱——大唐由盛转衰的转折点',
+        type: '转折视角',
+        guide: '一场席卷半壁江山的叛乱，如何结束了中国历史上最辉煌的盛世？',
+        tags: ['安史之乱', '转折', '藩镇'],
+        iconType: 'military',
+        content: '天宝十四载（755年），身兼范阳、平卢、河东三镇节度使的安禄山以"讨杨国忠"为名发动叛乱，叛军势如破竹，很快攻占洛阳和长安——唐玄宗仓皇逃往四川，途中在马嵬坡被迫赐死杨贵妃。这场持续八年的战乱，其根源在于玄宗朝后期的制度失衡：节度使集军权、财权、行政权于一身，藩镇势力尾大不掉；中央朝廷沉溺于太平盛世的安逸，丧失了危机感和控制力。安史之乱虽然最终被平定，但唐朝从此由盛转衰——藩镇割据格局形成、宦官专权加剧、经济重心加速南移。一个时代的终结往往不是因为外敌入侵，而是因为内部结构的失衡达到了临界点。',
+        significance: '安史之乱是唐史乃至整个中国帝制时代最重要的转折点之一，其影响波及此后数百年的政治格局。',
+        inspiration: '盛世之下往往潜伏着最深的危机——当制度不能有效约束权力、当治理者丧失了警惕，再辉煌的文明也可能一朝崩塌。',
+        related: ['藩镇割据', '马嵬坡之变', '郭子仪', '藩镇之祸']
+      }
+    ]
+  },
+  {
+    id: 'five-dynasties',
+    name: '五代十国',
+    years: '907—960年',
+    capital: '多变（开封、洛阳等）',
+    keyFigures: '朱温、李存勖、石敬瑭、李煜',
+    group: '隋唐',
+    color: '#d4a745',
+    dotClass: 'sui-tang',
+    perspectives: [
+      {
+        id: 'fd-1',
+        title: '藩镇问题的延续——分裂格局的深层逻辑',
+        type: '政治制度视角',
+        guide: '五代十国的分裂不是偶然，而是安史之乱后二百年藩镇格局的自然结果。',
+        tags: ['藩镇', '分裂', '五代替换'],
+        iconType: 'politics',
+        content: '五代十国的五十余年（907—960年），是唐末藩镇割据格局的延续和激化。北方五代（后梁、后唐、后晋、后汉、后周）更替频繁，每个王朝的开国者几乎都是前朝的节度使——"天子，兵强马壮者为之"是这一时代的残酷逻辑。南方十国则相对稳定，各据一方发展经济和文化。这一时期的深层结构是：自安史之乱后，军事权力已被地方化的节度使体系所分割，中央集权名存实亡。谁拥有最强的军队，谁就能夺取皇位——但这种基于个人武力的权力极不稳定，因此政权像走马灯一样更替。这一百年乱局的终结者——宋太祖赵匡胤——正是看透了这一逻辑，以"杯酒释兵权"彻底将军事权力重新收归中央。',
+        significance: '五代十国的分裂是唐末藩镇制度的必然产物，其教训直接催生了宋代"以文制武"的军事制度。',
+        inspiration: '制度设计的缺陷会在几代人之后显现为灾难性的后果——唐朝在安史之乱后姑息藩镇的权宜之计，终酿成两个世纪的分裂乱局。',
+        related: ['朱温篡唐', '儿皇帝石敬瑭', '燕云十六州', '后周世宗柴荣']
+      },
+      {
+        id: 'fd-2',
+        title: '李煜——亡国之君的千古词章',
+        type: '关键人物视角',
+        guide: '"问君能有几多愁，恰似一江春水向东流"——一个被推上皇位的词人。',
+        tags: ['李煜', '词', '南唐'],
+        iconType: 'figure',
+        content: '李煜（937—978年），南唐后主，中国文学史上最杰出的词人之一。他本无心政治，却被命运推上皇位。在位期间南唐国势日衰，最终被宋太祖赵匡胤所灭。李煜被俘至汴京后，以亡国之君的身份度过了生命中最后三年——恰恰是这三年，催生了他最震撼人心的词作。"春花秋月何时了，往事知多少""剪不断，理还乱，是离愁""流水落花春去也，天上人间"——这些词句将个人的身世之感与家国之痛融为一体，将词从"花间"小令提升至与诗并列的抒情艺术高度。王国维在《人间词话》中评价："词至李后主而眼界始大，感慨遂深。"一个失败的皇帝，反而成为了一位不朽的词人——历史角色和个人命运的错位，造就了文学史上独特的悲剧美。',
+        significance: '李煜的词标志着词从娱乐性小调向严肃抒情文学的转变，是宋词繁荣的重要先驱。',
+        inspiration: '命运有时会以残酷的方式将人置于不属于自己的位置——李煜作为皇帝是失败的，但作为词人却超越了所有的皇帝。',
+        related: ['南唐灭国', '宋太祖', '花间词', '人间词话']
+      }
+    ]
+  },
+  {
+    id: 'northern-song',
+    name: '北宋',
+    years: '960—1127年',
+    capital: '开封（今河南开封）',
+    keyFigures: '赵匡胤、苏轼、王安石、欧阳修、沈括',
+    group: '宋元',
+    color: '#7b9eb3',
+    dotClass: 'song-yuan',
+    perspectives: [
+      {
+        id: 'nsong-1',
+        title: '《清明上河图》——一幅画中的繁华密码',
+        type: '经济视角',
+        guide: '五米长卷中，隐藏着一个什么样的商业帝国？',
+        tags: ['清明上河图', '商业', '市民生活'],
+        iconType: 'economy',
+        content: '张择端的《清明上河图》是中国最著名的风俗画长卷，以惊人的细节描绘了北宋都城开封的繁华景象。画卷中可以看到：汴河上满载货物的漕船、街道两旁林立的商铺和酒楼、穿梭往来的商贾和各色市民、骆驼商队与西域客商——这些画面是对北宋商品经济繁荣最直观的记录。北宋是中国古代商业社会的巅峰：城市中坊市制瓦解，临街开店自由营业；出现了世界上最早的纸币"交子"；海外贸易达到空前规模，市舶司收入成为国家财政的重要支柱。据估算，北宋的城镇化率达到约20%，人均GDP在当时的世界上名列前茅。《清明上河图》中的每一个路人、每一间店铺，都在讲述着一个商业文明的故事。',
+        significance: '《清明上河图》是研究北宋社会经济最珍贵的图像史料，展现了古代城市商业文明的最高水平。',
+        inspiration: '经济的活力来自市场的自由——《清明上河图》中那些平凡的市民和商贩，暗示着一个道理：繁荣不是由帝王创造的，而是由无数个普通人的交易和创造汇聚而成的。',
+        related: ['交子', '坊市制瓦解', '市舶司', '海上贸易']
+      },
+      {
+        id: 'nsong-2',
+        title: '活字印刷——知识传播的革命',
+        type: '科技发明视角',
+        guide: '毕昇发明活字印刷，让书籍从奢侈品变成了普通人也能拥有的物品。',
+        tags: ['活字印刷', '毕昇', '科技'],
+        iconType: 'technology',
+        content: '北宋庆历年间（约1045年），平民毕昇发明了胶泥活字印刷术。他将每个汉字单独制成活字，排版时按需组合，印完后活字可拆卸重复使用。这一发明极大提高了印刷效率，降低了书籍生产成本——此前雕版印刷需为每一页刻一整块木板，一本大部头著作的雕版可能耗费数年。活字印刷使书籍的大量复制成为可能，知识因此从前所未有的速度扩散到更广阔的社会层面，直接推动了宋代文化的繁荣和教育的普及。活字印刷的思想传到朝鲜后发展为金属活字，经丝绸之路传入欧洲后，古登堡在15世纪发明铅活字印刷，被公认为欧洲文艺复兴和宗教改革的催化剂——毕昇的发明实际上是世界信息革命的最早源头之一。',
+        significance: '活字印刷术是人类信息传播史上继造纸术之后的第二次革命，深刻影响了东西方文明的历史进程。',
+        inspiration: '一项技术革新如果能大幅降低知识和信息的传播成本，它所带来的社会变革将是根本性的——毕昇也许想不到，他的泥活字会在数百年后改变了整个世界的面貌。',
+        related: ['雕版印刷', '梦溪笔谈', '四大发明', '古登堡']
+      },
+      {
+        id: 'nsong-3',
+        title: '王安石变法——理想与现实的激烈碰撞',
+        type: '改革视角',
+        guide: '一场试图通过国家干预重塑社会经济的宏大改革，为何最终走向失败？',
+        tags: ['王安石', '变法', '改革'],
+        iconType: 'politics',
+        content: '熙宁二年（1069年），宋神宗任命王安石为参知政事，启动了中国帝制时代最激进、最系统的改革之一。变法的核心内容：青苗法（政府向农民提供低息贷款）、免役法（以钱代役）、市易法（政府调控物价）、方田均税法（清查土地均平赋税）、保甲法（民兵组织）等。王安石的目标是"因天下之力以生天下之财，取天下之财以供天下之费"——通过国家力量激活经济、增加财政收入，同时减轻农民负担。然而，变法在执行中遇到了严重问题：基层官吏借机盘剥、政策执行走样、保守派（以司马光为首）的激烈反对。变法在神宗去世后被彻底废除，此后新党旧党交替报复，北宋政治陷入内耗，直至亡国。',
+        significance: '王安石变法是帝制时代最宏大的国家治理实验，其成败为后世提供了关于改革方法论最丰富的案例。',
+        inspiration: '好的政策意图不等于好的政策效果——改革不仅需要明确的目标，更需要考虑到执行者的人性、利益的妥协和时机的把握。',
+        related: ['青苗法', '司马光', '新旧党争', '宋神宗']
+      }
+    ]
+  },
+  {
+    id: 'southern-song',
+    name: '南宋',
+    years: '1127—1279年',
+    capital: '临安（今浙江杭州）',
+    keyFigures: '赵构、岳飞、文天祥、辛弃疾',
+    group: '宋元',
+    color: '#7b9eb3',
+    dotClass: 'song-yuan',
+    perspectives: [
+      {
+        id: 'ssong-1',
+        title: '岳飞抗金——"莫须有"的千古奇冤',
+        type: '军事视角',
+        guide: '一个"精忠报国"的将军，为何被以"莫须有"的罪名杀害？',
+        tags: ['岳飞', '抗金', '忠奸'],
+        iconType: 'military',
+        content: '岳飞（1103—1142年）是南宋初年最杰出的抗金将领。他率领的岳家军纪律严明——"冻死不拆屋，饿死不掳掠"，在郾城、颍昌等战役中大败金军，直逼开封，收复中原指日可待。然而，宋高宗赵构和宰相秦桧一心求和，以十二道金牌将其召回，继而以"莫须有"（也许有）的罪名将其在风波亭处死。岳飞之死的背后是复杂的政治逻辑：一旦北伐成功，被俘的宋徽宗和宋钦宗一旦返回，高宗本人的皇位合法性将受到挑战；而武将坐大、功高震主也是历代帝王最深的忌惮。岳飞之死表明，在帝制中国的权力逻辑中，军事胜利有时必须让位于政治需要——"莫须有"三字由此成为中国历史上最令人心寒的词汇之一。',
+        significance: '岳飞之死是南宋政治悲剧的缩影，"莫须有"成为中国历史上政治迫害最经典的符号。',
+        inspiration: '忠勇并不能保证正义——当一个体制的优先目标不再是国家利益而是权力安全时，最忠诚的战士也可能成为最可悲的牺牲品。',
+        related: ['郾城大捷', '十二道金牌', '秦桧', '绍兴和议']
+      },
+      {
+        id: 'ssong-2',
+        title: '海上丝绸之路的巅峰——从泉州看南宋的世界贸易',
+        type: '贸易视角',
+        guide: '偏安江南的南宋，竟建立起了古代世界最繁荣的海上贸易网络。',
+        tags: ['海上丝路', '泉州', '贸易'],
+        iconType: 'economy',
+        content: '南宋虽然只占有半壁江山，却将海上贸易推向了一个前无古人的高度。泉州（刺桐港）成为当时世界最大的港口之一，与亚非数十个国家和地区有贸易往来——中国的瓷器、丝绸、茶叶输往海外，而东南亚的香料、印度的棉布、阿拉伯的珠宝、非洲的象牙则涌入中国。南宋市舶司的年收入高达200万贯，约占财政总收入的五分之一。发达的造船和航海技术（指南针已普遍应用于航海）、完善的海商管理制度（市舶条法）、以及政府对外贸的积极鼓励（奖励招商），使南宋成为古代世界最开放的海洋贸易国家之一。这一贸易网络的影响延伸到文化和宗教领域——泉州至今保留着清净寺（伊斯兰教）、开元寺（佛教）、天后宫（妈祖信仰）等多元宗教遗存。',
+        significance: '南宋海上贸易的繁荣证明，中国并非天然是"内向大陆文明"——在合适的条件下，同样可以成为开放的海洋贸易强国。',
+        inspiration: '地理上的"偏安"并不一定是衰落——南宋失去了半壁江山，却在大海中开辟了新的天地，文明的生命力总是在困境中找到出口。',
+        related: ['泉州港', '市舶司', '指南针', '马可波罗']
+      }
+    ]
+  },
+  {
+    id: 'yuan',
+    name: '元朝',
+    years: '1271—1368年',
+    capital: '大都（今北京）',
+    keyFigures: '忽必烈、郭守敬、关汉卿、马可·波罗',
+    group: '宋元',
+    color: '#7b9eb3',
+    dotClass: 'song-yuan',
+    perspectives: [
+      {
+        id: 'yuan-1',
+        title: '空前的大一统——行省制与多元帝国',
+        type: '疆域视角',
+        guide: '一个游牧民族建立的王朝，却将中国的版图扩展到了前所未有的广度。',
+        tags: ['大一统', '行省制', '多元'],
+        iconType: 'politics',
+        content: '元朝是中国历史上疆域最大的王朝之一，其版图涵盖了今天中国的绝大部分以及蒙古、西伯利亚南部、中亚东部等地。为管理这一庞大帝国，元朝创立了行省制度——在全国设置十一处"行中书省"，作为中央政府的派出机构管理地方，这一制度被明清两朝继承并沿用至今的"省"制。元朝的另一大特征是高度多元化的治理体系：蒙古人、色目人（西域各族人）、汉人、南人在法律和社会地位上等级分明；同时，各种宗教（佛教、道教、伊斯兰教、基督教聂斯托利派）均获宽容。这一多元帝国的管理模式既有务实包容的一面，也有民族等级制的不平等一面。丝绸之路在蒙古治世（Pax Mongolica）下达到全盛，东西方的人员、商品和思想交流空前活跃。',
+        significance: '元朝行省制是现代中国省级行政区划的制度源头，其多元治理模式为多民族大国的管理提供了重要的历史经验。',
+        inspiration: '疆域的统一可以通过军事征服实现，但国家的长治久安需要制度的创新和各民族的认同——行省制度是元朝留给后世最持久的政治遗产。',
+        related: ['行省制度', '蒙古治世', '马可波罗来华', '四等人制']
+      },
+      {
+        id: 'yuan-2',
+        title: '关汉卿与元曲——市井舞台上的文学革命',
+        type: '戏曲视角',
+        guide: '当科举制度一度中断，文人的才情转向了勾栏瓦舍中的戏剧创作。',
+        tags: ['关汉卿', '元曲', '杂剧'],
+        iconType: 'culture',
+        content: '元曲（元杂剧）是中国古典戏剧的黄金时代。关汉卿（约1220—约1300年）是元曲四大家之首，被誉为"曲圣"。他的代表作《窦娥冤》以感天动地的悲剧力量揭露社会黑暗——窦娥被冤杀时发下三桩誓愿（血溅白练、六月飞雪、大旱三年），全部应验。这一时期的杂剧创作空前繁荣：王实甫的《西厢记》、白朴的《梧桐雨》、马致远的《汉宫秋》——这些作品在勾栏瓦舍（城市中的商业演出场所）中面向市井百姓演出，标志着中国文学从文人精英垄断真正走向了大众消费。元曲繁荣的社会背景与元代科举一度中断有关，大量文人在仕途受阻后转向通俗文学创作，反而成就了中国戏剧文学最辉煌的时代。',
+        significance: '元曲是中国古典戏剧文学的巅峰，代表了文学从精英化走向通俗化的重大转折。',
+        inspiration: '文学的动力有时候来自压抑——当向上的社会通道变窄，文人的才情在戏剧创作中找到了前所未有的自由和表达空间。',
+        related: ['窦娥冤', '西厢记', '杂剧', '勾栏瓦舍']
+      }
+    ]
+  },
+  {
+    id: 'ming',
+    name: '明朝',
+    years: '1368—1644年',
+    capital: '应天→顺天（南京→北京）',
+    keyFigures: '朱元璋、朱棣、郑和、王阳明、张居正',
+    group: '明清',
+    color: '#8a5a4a',
+    dotClass: 'ming-qing',
+    perspectives: [
+      {
+        id: 'ming-1',
+        title: '郑和七下西洋——被遗忘的航海壮举',
+        type: '对外交流视角',
+        guide: '比哥伦布早八十余年，一支两万七千人的中国舰队在印度洋上劈波斩浪。',
+        tags: ['郑和', '航海', '朝贡贸易'],
+        iconType: 'diplomacy',
+        content: '从1405年至1433年，郑和奉命率领当时世界上最庞大的舰队七次远航西洋（泛指印度洋）。其宝船长约百余米，编队人员多达两万七千余人，配备先进的罗盘导航和舱壁水密技术。舰队最远抵达非洲东海岸（今肯尼亚、索马里），遍访东南亚、南亚、西亚、东非三十余国。郑和的航海是和平的远航——以朝贡贸易和外交宣示为主要目的，没有占领一寸殖民地。然而宣德八年（1433年）后，明朝突然终止了远航，甚至焚毁航海档案。原因众说纷纭：财政负担过重、北方蒙古威胁加剧、儒家官僚对"劳民伤财"的抵制等。这一戛然而止的航海壮举给后世留下了无尽的感慨和思考——如果郑和的远航继续下去，世界历史会怎样改写？',
+        significance: '郑和下西洋代表了古代世界远洋航海的最高水平，也是中国主动走向海洋的最辉煌篇章。',
+        inspiration: '一个文明的选择决定了它的未来——明朝在海洋时代的门槛前选择了退缩，而半个世纪后，欧洲人开始驾驶着更小、但更坚定的船只驶向东方。',
+        related: ['宝船', '马六甲', '朝贡贸易', '海禁政策']
+      },
+      {
+        id: 'ming-2',
+        title: '紫禁城——一座宫殿里的营造智慧',
+        type: '建筑视角',
+        guide: '占地72万平方米、九千余间房屋的紫禁城，如何用建筑语言讲述着皇权的神圣？',
+        tags: ['紫禁城', '建筑', '皇权'],
+        iconType: 'technology',
+        content: '紫禁城（故宫）始建于明永乐四年（1406年），历时十四年建成。作为明清两代二十四位皇帝的居所和政治中心，它的营造凝聚了中国古代建筑文明的最高智慧。中轴线对称布局体现了"居中不偏"的皇权思想；前朝后寝的功能分区反映了"国之大事在祀与戎"与日常治理的空间分离；黄色琉璃瓦（象征皇权）、红色宫墙（象征尊贵）的色彩运用；以及从太和殿（最高等级的"重檐庑殿顶"）到乾清宫的等级递减——每一处细节都在用建筑语言传达着政治秩序和宇宙观念。紫禁城不仅是世界上现存规模最大的古代木结构建筑群，也是中国古代"天人合一"宇宙观的立体呈现。',
+        significance: '紫禁城是中国古代建筑艺术的集大成者，以建筑形式完美表达了"天子居中"的政治哲学。',
+        inspiration: '建筑不仅是空间的艺术，更是权力的语言——紫禁城每一寸空间的设计都在无声地讲述着"谁是这个世界的中心"。',
+        related: ['永乐迁都', '天坛', '样式雷', '故宫']
+      },
+      {
+        id: 'ming-3',
+        title: '王阳明——"知行合一"的心灵革命',
+        type: '文化思想视角',
+        guide: '"破山中贼易，破心中贼难"——一位思想家如何改变了东亚的精神世界？',
+        tags: ['王阳明', '心学', '知行合一'],
+        iconType: 'culture',
+        content: '王守仁（号阳明，1472—1529年）是明代最伟大的思想家。他在龙场贬谪的困顿中悟出"心即理"——天理不在外部权威（如经书或圣人），而在每个人的内心，由此创立了心学体系。其核心理念"知行合一"强调：真知必然导致行动，不行等于不知；"致良知"则主张每个人天生具有道德判断力（良知），修养的目的在于去除私欲的遮蔽、让良知自然呈现。王阳明的心学打破了程朱理学对思想的僵化束缚，将道德实践的权利从经院学者手中交还给了普通人——"满街都是圣人"（圣人并不遥远，人人都可以成圣）。阳明心学在晚明迅速传播，更在日本、朝鲜半岛产生了深远影响——日本明治维新的许多先驱人物（如吉田松阴）都是阳明学的信徒。',
+        significance: '阳明心学是中国思想史上一次深刻的主体性革命，将道德的根源从外在权威转向内在良知。',
+        inspiration: '"知行合一"至今仍是极具生长力的哲学命题——在这个信息爆炸的时代，真正的智慧不在于知道多少，而在于将所知转化为所行。',
+        related: ['龙场悟道', '致良知', '程朱理学', '日本阳明学']
+      }
+    ]
+  },
+  {
+    id: 'early-qing',
+    name: '清朝前期',
+    years: '1644—1840年',
+    capital: '北京',
+    keyFigures: '康熙、雍正、乾隆、曹雪芹',
+    group: '明清',
+    color: '#8a5a4a',
+    dotClass: 'ming-qing',
+    perspectives: [
+      {
+        id: 'eqing-1',
+        title: '康乾盛世——最后盛世的真实面貌',
+        type: '盛世视角',
+        guide: '人口突破三亿、疆域空前辽阔的康乾盛世，为何被称为"盛世的幻象"？',
+        tags: ['康乾盛世', '人口增长', '盛世'],
+        iconType: 'politics',
+        content: '康乾盛世（约1661—1796年）通常被视为中国帝制时代的最后一个辉煌期。在此期间，清朝平定了三藩之乱、收复台湾、平定准噶尔、统一新疆，奠定了现代中国疆域的基本轮廓。农业经济高度发达，推广了玉米、甘薯等高产作物，人口从约一亿激增至三亿以上。然而，这一盛世的另一面同样值得关注：文字狱达到空前的严酷程度（如《明史》案诛杀数百人），思想控制极为严密；科学技术方面，当欧洲正在经历科学革命和工业革命时，清朝的科技水平与西方的差距悄然拉大；政治体制上，君主专制强化到前所未有的程度——军机处的设立标志着皇权对行政系统的彻底掌控。康乾盛世像是一个精致的"顶峰"——盛世的辉煌掩盖了制度性的隐患。',
+        significance: '康乾盛世是中国帝制时代最后的辉煌，也是"近代化滞缓"的前夜——它展现了传统农业文明所能达到的最高成就及其内在局限。',
+        inspiration: '一个文明的"盛世"如果只是在原有轨道上做到极致，而没有制度和技术上的突破性创新，那么盛世之后等待它的可能是更大的落差。',
+        related: ['平定准噶尔', '文字狱', '军机处', '三藩之乱']
+      },
+      {
+        id: 'eqing-2',
+        title: '《四库全书》——编纂与禁毁的双面',
+        type: '文化视角',
+        guide: '中国历史上规模最大的图书编纂工程，同时也是一场浩大的文字清洗。',
+        tags: ['四库全书', '禁书', '文化'],
+        iconType: 'culture',
+        content: '乾隆皇帝于1772年启动《四库全书》编纂工程，历时十年，集三千余学者之力，抄录七部，每部收书3503种、79337卷——这是中国古代规模最大的丛书，被誉为"千古巨制"。《四库全书》系统整理和保存了大量珍贵的古代文献，对文化传承贡献巨大。但同时，乾隆借修书之名在全国范围大规模搜缴"违碍"书籍——凡涉及反清、夷夏之辨、或对满清统治有不敬之辞的书籍，或被删改，或被全毁。据估计，修书期间禁毁书籍达三千余种、总数逾十万部，许多珍贵文献因此失传。这一事件深刻地揭示了帝制时代"文化建设"的另一面——知识整理与思想控制往往是一体两面。',
+        significance: '《四库全书》的编纂是中华文化史上规模最大的文献整理工程，其禁毁行为也是专制时代"寓禁于征"最典型的案例。',
+        inspiration: '知识的命运总是与权力纠缠在一起——我们今天能读到的古代经典，是经过了多少次"筛选"的结果？',
+        related: ['文字狱', '纪晓岚', '禁书目录', '永乐大典']
+      }
+    ]
+  },
+  {
+    id: 'late-qing',
+    name: '晚清',
+    years: '1840—1912年',
+    capital: '北京',
+    keyFigures: '林则徐、曾国藩、李鸿章、康有为、梁启超、慈禧',
+    group: '近现代',
+    color: '#c94040',
+    dotClass: 'modern',
+    perspectives: [
+      {
+        id: 'lqing-1',
+        title: '鸦片战争——"数千年未有之变局"',
+        type: '危机视角',
+        guide: '一场因鸦片贸易而起的战争，将古老的中华帝国猛然拽入了近代世界体系。',
+        tags: ['鸦片战争', '近代化', '危机'],
+        iconType: 'military',
+        content: '1840年爆发的鸦片战争，被李鸿章称为"数千年未有之变局"——一个以天朝自居的古老文明，第一次遭遇到一个在技术、制度和思想上都截然不同的现代文明的全面冲击。战争的直接起因是英国为扭转对华贸易逆差而大量输入鸦片，林则徐虎门销烟（1839年）成为战争导火索。英国凭借坚船利炮迅速取胜，1842年《南京条约》割让香港、开放五口通商、赔偿巨款——这一不平等条约成为中国半殖民地化的开端。更深层来看，鸦片战争暴露了清朝在军事技术、政治制度、知识体系上全方位的落后：当英国已经完成工业革命和议会改革时，清朝仍然沉浸在"天朝上国"的自我想象中，对世界格局的变化几乎一无所知。',
+        significance: '鸦片战争是中国近代史的开端，标志着传统东亚朝贡体系的瓦解和中国被迫纳入西方主导的世界体系的开始。',
+        inspiration: '封闭自守不能带来安全，只会加速落后——鸦片战争的深刻教训至今仍是理解中国现代化命题的历史起点。',
+        related: ['虎门销烟', '南京条约', '五口通商', '林则徐']
+      },
+      {
+        id: 'lqing-2',
+        title: '从洋务运动到戊戌变法——救亡图存的探索之路',
+        type: '探索视角',
+        guide: '两代中国人的现代化尝试，从"师夷长技"到"变法维新"，为何屡屡受挫？',
+        tags: ['洋务运动', '戊戌变法', '现代化'],
+        iconType: 'politics',
+        content: '面对西方的冲击，晚清中国开始了艰难的现代化探索。第一阶段是洋务运动（1861—1895年），以曾国藩、李鸿章、张之洞等为代表，主张"中学为体、西学为用"——引进西方的军事技术和工业设备（江南制造局、轮船招商局、北洋水师等），但保持传统政治制度不变。甲午战争（1895年）北洋水师全军覆没，宣告洋务运动的"器物层面"改良不足以救国。第二阶段是戊戌变法（1898年），以康有为、梁启超为代表的维新派推动全面制度改革——包括废八股、设新式学堂、建立议会制度等。但变法仅持续103天便被慈禧太后发动的政变扼杀，六君子血洒菜市口。从器物到制度，两代人的救国尝试都未能成功——这凸显了帝制中国内部结构性保守势力的强大和革新之艰难。',
+        significance: '洋务运动到戊戌变法的历程浓缩了中国从"器物学习"到"制度改革"的近代化探索，其失败推动了中国走向更深层的革命。',
+        inspiration: '改革之难在于它不仅是方案的设计，更是力量的博弈——没有足够强大的改革力量作为支撑，再好的改革方案也可能在旧势力的反扑中失败。',
+        related: ['甲午战争', '百日维新', '戊戌六君子', '马关条约']
+      }
+    ]
+  },
+  {
+    id: 'republic',
+    name: '民国',
+    years: '1912—1949年',
+    capital: '南京（1927年后）',
+    keyFigures: '孙中山、蒋介石、毛泽东、鲁迅、胡适',
+    group: '近现代',
+    color: '#c94040',
+    dotClass: 'modern',
+    perspectives: [
+      {
+        id: 'republic-1',
+        title: '五四运动——新文化的启蒙之光',
+        type: '文化思想视角',
+        guide: '"德先生"与"赛先生"——一场以"科学"和"民主"为旗帜的思想启蒙运动。',
+        tags: ['五四运动', '新文化', '启蒙'],
+        iconType: 'culture',
+        content: '1919年5月4日，北京学生为抗议巴黎和会将德国在山东的权益转让给日本而走上街头，由此引发了席卷全国的五四运动。但五四的意义远不止于一次政治抗议——它是一场深刻的思想启蒙和文化革命。以陈独秀、胡适、鲁迅、李大钊为代表的新文化先驱们，在《新青年》等刊物上大声疾呼，提出"打倒孔家店"、提倡白话文、引进科学与民主。鲁迅的《狂人日记》（1918年）以白话小说的形式对旧礼教的"吃人"本质发出了最尖锐的批判；胡适推动了以白话文取代文言文的语言革命，使知识和思想向普罗大众敞开了大门。五四运动塑造了此后三十年中国知识分子的精神气质——批判、启蒙、改造社会，这一精神遗产至今仍是中国现代性的重要源泉。',
+        significance: '五四运动是中国从传统社会走向现代社会的精神分水岭，开启了以"科学"与"民主"为核心价值的现代化思潮。',
+        inspiration: '真正的变革不仅是制度的更替，更是人心的解放——五四一代人以思想为武器，在最根本的层面上推动了中国人的精神觉醒。',
+        related: ['新青年', '白话文运动', '鲁迅', '德先生赛先生']
+      },
+      {
+        id: 'republic-2',
+        title: '全民族抗战——烽火中的民族觉醒',
+        type: '军事视角',
+        guide: '十四年抗战，中华民族以巨大的牺牲换来了近代以来第一次反侵略战争的完全胜利。',
+        tags: ['抗日战争', '民族觉醒', '统一战线'],
+        iconType: 'military',
+        content: '从1931年九一八事变到1945年日本投降的十四年间，中国进行了艰苦卓绝的全民族抗战。七七事变（1937年）后，以国共合作为基础的抗日民族统一战线正式形成，全国各族各界人民投入到抗击日本侵略的洪流中。正面战场（淞沪会战、武汉会战、长沙会战等）和敌后战场（百团大战、游击战等）相互配合，以空间换时间，在极其困难的条件下坚持抗战。中国战场牵制了日本陆军的主力，为世界反法西斯战争作出了重大贡献。据统计，中国军民伤亡超过3500万人，直接经济损失逾5000亿美元。抗战的胜利不仅洗刷了近代以来屡战屡败的民族耻辱，更极大地增强了中华民族的凝聚力和自信心。',
+        significance: '抗日战争是中华民族近代以来反侵略战争的第一次完全胜利，标志着民族觉醒达到了全新的高度。',
+        inspiration: '一个民族在最危难的时刻迸发出的团结和坚韧，是最宝贵的精神财富——抗战精神至今仍是激励中华民族自强不息的强大力量。',
+        related: ['九一八事变', '七七事变', '南京大屠杀', '波茨坦公告']
+      }
+    ]
+  },
+  {
+    id: 'prc',
+    name: '中华人民共和国',
+    years: '1949年至今',
+    capital: '北京',
+    keyFigures: '毛泽东、邓小平、江泽民、胡锦涛、习近平',
+    group: '近现代',
+    color: '#c94040',
+    dotClass: 'modern',
+    perspectives: [
+      {
+        id: 'prc-1',
+        title: '改革开放——决定当代中国命运的抉择',
+        type: '复兴视角',
+        guide: '从"真理标准问题大讨论"到全面深化改革，一场改变数亿人命运的伟大变革。',
+        tags: ['改革开放', '经济发展', '现代化'],
+        iconType: 'politics',
+        content: '1978年12月，中共十一届三中全会作出了改革开放的历史性决策。从农村家庭联产承包责任制起步，到设立经济特区，再到建立社会主义市场经济体制——改革开放逐步深入，释放出巨大的社会生产力。四十余年间，中国经济总量从世界排名十几位跃升至第二位，人均GDP从不足200美元增长至超过一万美元，七亿多农村贫困人口实现脱贫，城镇化率从不到20%提升至超过65%，建成了世界上最大的高速公路网、高铁网和社会保障体系。改革开放的起点是"真理标准问题大讨论"的思想解放——"实践是检验真理的唯一标准"打破了教条主义的束缚，为整个民族恢复了脚踏实地的精神。这一伟大历程证明：解放思想、实事求是，是中国发展的根本法宝。',
+        significance: '改革开放是当代中国命运的关键抉择，创造了人类历史上规模最大、速度最快的经济崛起奇迹。',
+        inspiration: '发展的动力来自于解放思想和激发活力——当亿万人民被赋予创造财富和追求美好生活的自由时，所产生的力量是不可阻挡的。',
+        related: ['十一届三中全会', '经济特区', '社会主义市场经济', '加入WTO']
+      },
+      {
+        id: 'prc-2',
+        title: '科技创新——从两弹一星到天宫空间站',
+        type: '科技视角',
+        guide: '一个曾经积贫积弱的国家，如何在几十年间成长为世界科技创新的重要力量？',
+        tags: ['科技', '航天', '创新'],
+        iconType: 'technology',
+        content: '新中国的科技发展走过了一条充满艰辛的自主创新之路。1964年第一颗原子弹爆炸成功，1967年氢弹试爆成功，1970年"东方红一号"卫星发射升空——"两弹一星"在极其困难的条件下奠定了大国地位。进入21世纪，中国科技加速追赶：神舟系列飞船实现载人航天，嫦娥探月工程绕落回三步走圆满完成，天宫空间站建成并长期在轨运营，北斗导航系统实现全球覆盖，量子通信和量子计算取得世界级突破，高铁技术从引进消化走向全面自主创新。截至2025年，中国的研发投入总量居世界前列，国际专利申请量连续多年全球领先。从"跟跑"到"并跑"再到部分领域的"领跑"，中国科技的崛起正在深刻改变全球创新的版图。',
+        significance: '科技创新能力的跃升是中华民族伟大复兴最坚实的支撑，也是中国从大国走向强国的关键标志。',
+        inspiration: '科技自主不是闭门造车，而是在开放合作中掌握核心能力——从跟踪模仿到原始创新，这条道路没有捷径，每一步都需要坚实的积累和持续的人才投入。',
+        related: ['两弹一星', '神舟飞船', '嫦娥工程', '天宫空间站', '北斗导航']
+      },
+      {
+        id: 'prc-3',
+        title: '脱贫攻坚——人类减贫史上的奇迹',
+        type: '社会民生视角',
+        guide: '八年时间近一亿人脱贫——这不仅是经济数字，更是人的尊严和可能性的再造。',
+        tags: ['脱贫攻坚', '全面小康', '民生'],
+        iconType: 'society',
+        content: '2020年底，中国如期完成新时代脱贫攻坚目标任务，现行标准下9899万农村贫困人口全部脱贫，832个贫困县全部摘帽，12.8万个贫困村全部出列。这一成就的背后是一套系统化的国家行动——精准扶贫方略（建档立卡、因户施策）、大规模驻村帮扶（超过300万驻村第一书记和帮扶干部）、产业扶贫与教育扶贫并重、以及持续的制度性投入。贫困不仅是一个收入问题，更是发展机会的剥夺。脱贫攻坚的意义不仅在于收入提升，更在于贫困地区的基础设施（道路、电力、网络、安全饮水）和公共服务（教育、医疗）实现了历史性的改善。"小康路上一个都不能少"——这一政治承诺的兑现，为世界减贫事业贡献了中国方案。',
+        significance: '全面脱贫是中华民族发展史上具有里程碑意义的成就，也是全球减贫史上规模最大、成效最显著的实践。',
+        inspiration: '消除贫困需要经济增长，更需要制度的决心和精准的行动——当发展的阳光照进最偏远的山村，每一个人的潜能才能被真正释放。',
+        related: ['精准扶贫', '全面小康', '乡村振兴', '共同富裕']
+      }
+    ]
+  }
+];
+
+// ============ 应用状态 ============
+let currentLevel = 1;
+let currentPeriod = null;
+let currentPerspective = null;
+let theme = 'dark';
+
+// ============ 初始化 ============
+function init() {
+  buildTimeline();
+  initParticles();
+}
+
+// ============ 构建时间轴 ============
+function buildTimeline() {
+  const line = document.getElementById('timeline-line');
+  line.innerHTML = '';
+
+  historicalData.forEach((period, index) => {
+    const node = document.createElement('div');
+    node.className = 'timeline-node';
+    node.setAttribute('data-id', period.id);
+    node.setAttribute('data-group', period.group);
+    node.onclick = () => selectPeriod(period.id);
+
+    // 年份标签
+    const yearSpan = document.createElement('div');
+    yearSpan.className = 'timeline-year';
+    yearSpan.textContent = period.years;
+
+    // 悬浮浮层
+    const tooltip = document.createElement('div');
+    tooltip.className = 'timeline-tooltip';
+    tooltip.innerHTML = `<strong>${period.name}</strong><br><span style="font-size:0.75rem;">${period.years}</span>`;
+
+    // 节点圆点
+    const dot = document.createElement('div');
+    dot.className = `timeline-dot ${period.dotClass}`;
+
+    // 朝代名称
+    const label = document.createElement('div');
+    label.className = 'timeline-label';
+    label.textContent = period.name;
+
+    node.appendChild(yearSpan);
+    node.appendChild(tooltip);
+    node.appendChild(dot);
+    node.appendChild(label);
+    line.appendChild(node);
+  });
+}
+
+// ============ 选择时期 → 第二级 ============
+function selectPeriod(periodId) {
+  const period = historicalData.find(p => p.id === periodId);
+  if (!period) return;
+
+  currentPeriod = period;
+  currentPerspective = null;
+  currentLevel = 2;
+
+  // 更新导航
+  updateBreadcrumb([
+    { label: '总览', action: 'goToOverview' },
+    { label: period.name, action: null, current: true }
+  ]);
+
+  // 隐藏欢迎信息
+  document.getElementById('welcome-message').classList.add('hidden');
+
+  // 构建第二级内容
+  const level2 = document.getElementById('level2-content');
+  level2.classList.remove('hidden');
+  document.getElementById('level3-content').classList.add('hidden');
+
+  level2.innerHTML = `
+    <div class="btn-group">
+      <button class="btn-back" onclick="goToOverview()">← 返回总览</button>
+    </div>
+    <div class="period-header">
+      <div class="period-name">${period.name}</div>
+      <div class="period-info">${period.years}　|　都城：${period.capital}　|　关键人物：${period.keyFigures}</div>
+      <div class="period-tags">
+        ${period.perspectives.map(p => `<span class="p-tag">${p.type}</span>`).join('')}
+      </div>
+    </div>
+    <div class="perspectives-grid">
+      ${period.perspectives.map(p => `
+        <div class="perspective-card" onclick="selectPerspective('${period.id}', '${p.id}')">
+          <div class="card-icon">${getIconSVG(p.iconType)}</div>
+          <div class="card-type-badge">${p.type}</div>
+          <div class="card-title">${p.title}</div>
+          <div class="card-guide">${p.guide}</div>
+          <div class="card-tags">
+            ${p.tags.map(t => `<span class="card-tag">#${t}</span>`).join(' ')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // 滚动到内容区
+  document.getElementById('content-area').scrollIntoView({ behavior: 'smooth' });
+
+  // 更新时间轴选中状态
+  updateTimelineSelection(periodId);
+}
+
+// ============ 选择视角 → 第三级 ============
+function selectPerspective(periodId, perspectiveId) {
+  const period = historicalData.find(p => p.id === periodId);
+  if (!period) return;
+  const perspective = period.perspectives.find(p => p.id === perspectiveId);
+  if (!perspective) return;
+
+  currentPeriod = period;
+  currentPerspective = perspective;
+  currentLevel = 3;
+
+  // 更新导航
+  updateBreadcrumb([
+    { label: '总览', action: 'goToOverview' },
+    { label: period.name, action: `selectPeriod('${periodId}')` },
+    { label: perspective.title, action: null, current: true }
+  ]);
+
+  // 隐藏第二级，显示第三级
+  document.getElementById('welcome-message').classList.add('hidden');
+  document.getElementById('level2-content').classList.add('hidden');
+  const level3 = document.getElementById('level3-content');
+  level3.classList.remove('hidden');
+
+  const colorVar = getColorForPerspectiveType(perspective.iconType);
+
+  level3.innerHTML = `
+    <div class="perspective-detail">
+      <div class="btn-group">
+        <button class="btn-back" onclick="backToPeriod()">← 返回视角列表</button>
+        <button class="btn-back" onclick="goToOverview()">↩ 返回总览</button>
+      </div>
+      <div class="detail-panel" style="background: linear-gradient(135deg, ${colorVar}05, var(--glass-bg));">
+        <div class="detail-seal">${period.name}</div>
+        <div class="detail-header">
+          <div class="detail-icon-area">${getIconSVG(perspective.iconType)}</div>
+          <div class="detail-title-area">
+            <span style="color:var(--gold-light);font-size:0.8rem;letter-spacing:2px;">${perspective.type}</span>
+            <div class="detail-title">${perspective.title}</div>
+            <div class="detail-subtitle">"${perspective.guide}"</div>
+          </div>
+        </div>
+        <div class="detail-body">
+          <div class="detail-main">
+            <h3>📖 深度解读</h3>
+            <p>${perspective.content}</p>
+            <h3>💡 历史意义</h3>
+            <p>${perspective.significance}</p>
+            <h3>🔍 启示</h3>
+            <p style="font-style:italic;border-left:3px solid var(--vermillion-light);padding-left:16px;color:var(--text-secondary);">
+              ${perspective.inspiration}
+            </p>
+          </div>
+          <div class="detail-sidebar">
+            <h4>🏷️ 关键词</h4>
+            <div class="keyword-list">
+              ${perspective.tags.map(t => `<span class="keyword-item">${t}</span>`).join('')}
+            </div>
+            <h4>📅 相关事件与人物</h4>
+            <ul class="related-events">
+              ${perspective.related.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+            <div style="margin-top:16px;padding:12px;background:rgba(212,167,69,0.08);border-radius:8px;font-size:0.8rem;color:var(--text-secondary);">
+              <strong>${period.name}</strong> · ${period.years}<br>
+              都城：${period.capital}<br>
+              关键人物：${period.keyFigures}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 滚动到内容区顶部
+  document.getElementById('content-area').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============ 返回到时期（第二级） ============
+function backToPeriod() {
+  if (currentPeriod) {
+    selectPeriod(currentPeriod.id);
+  }
+}
+
+// ============ 返回总览（第一级） ============
+function goToOverview() {
+  currentLevel = 1;
+  currentPeriod = null;
+  currentPerspective = null;
+
+  updateBreadcrumb([{ label: '总览', action: null, current: true }]);
+
+  document.getElementById('welcome-message').classList.remove('hidden');
+  document.getElementById('level2-content').classList.add('hidden');
+  document.getElementById('level3-content').classList.add('hidden');
+
+  updateTimelineSelection(null);
+
+  // 滚动到时间轴
+  document.getElementById('timeline-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============ 面包屑更新 ============
+function updateBreadcrumb(items) {
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = items.map((item, i) => {
+    if (i > 0 && i < items.length) {
+      return `<span class="separator">›</span>` + (item.action
+        ? `<a onclick="${item.action}">${item.label}</a>`
+        : `<span class="current">${item.label}</span>`);
+    }
+    return item.action
+      ? `<a onclick="${item.action}">${item.label}</a>`
+      : `<span class="current">${item.label}</span>`;
+  }).join('');
+}
+
+// ============ 时间轴选中高亮 ============
+function updateTimelineSelection(periodId) {
+  document.querySelectorAll('.timeline-node').forEach(node => {
+    if (periodId && node.getAttribute('data-id') === periodId) {
+      node.classList.add('selected');
+    } else {
+      node.classList.remove('selected');
+    }
+  });
+}
+
+// ============ 快速跳转 ============
+function scrollToPeriodGroup(groupName) {
+  const node = document.querySelector(`.timeline-node[data-group="${groupName}"]`);
+  if (node) {
+    const container = document.getElementById('timeline-scroll');
+    const offset = node.offsetLeft - container.offsetWidth / 2 + node.offsetWidth / 2;
+    container.scrollTo({ left: offset, behavior: 'smooth' });
+  }
+}
+
+// ============ 图标系统（CSS/SVG绘制） ============
+function getIconSVG(type) {
+  const size = 56;
+  const svgs = {
+    politics: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <rect x="8" y="18" width="40" height="30" rx="2" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <rect x="16" y="8" width="24" height="14" rx="2" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <line x1="28" y1="22" x2="28" y2="34" stroke="#d4a745" stroke-width="2"/>
+      <circle cx="28" cy="40" r="3" fill="#d4a745"/>
+    </svg>`,
+    culture: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <rect x="10" y="10" width="36" height="40" rx="2" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <line x1="16" y1="18" x2="40" y2="18" stroke="#d4a745" stroke-width="1.5"/>
+      <line x1="16" y1="24" x2="40" y2="24" stroke="#d4a745" stroke-width="1.5"/>
+      <line x1="16" y1="30" x2="34" y2="30" stroke="#d4a745" stroke-width="1.5"/>
+      <line x1="16" y1="36" x2="38" y2="36" stroke="#d4a745" stroke-width="1.5"/>
+      <circle cx="42" cy="14" r="6" fill="none" stroke="#c94f3a" stroke-width="1.5"/>
+    </svg>`,
+    military: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <path d="M28 8 L38 22 L52 20 L42 34 L48 48 L32 40 L16 48 L22 34 L12 20 L26 22 Z" fill="none" stroke="#c94f3a" stroke-width="2"/>
+      <circle cx="28" cy="28" r="8" fill="none" stroke="#d4a745" stroke-width="2"/>
+    </svg>`,
+    economy: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <circle cx="28" cy="22" r="14" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <rect x="24" y="10" width="8" height="10" rx="1" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <text x="28" y="26" text-anchor="middle" fill="#d4a745" font-size="14" font-weight="bold">¥</text>
+    </svg>`,
+    technology: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <circle cx="28" cy="28" r="14" fill="none" stroke="#7b9eb3" stroke-width="2"/>
+      <path d="M28 14 L28 28 L38 34" fill="none" stroke="#7b9eb3" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="28" cy="28" r="3" fill="#7b9eb3"/>
+      <circle cx="28" cy="42" r="1.5" fill="#7b9eb3"/>
+      <circle cx="42" cy="38" r="1.5" fill="#7b9eb3"/>
+      <circle cx="14" cy="38" r="1.5" fill="#7b9eb3"/>
+    </svg>`,
+    society: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <circle cx="20" cy="22" r="7" fill="none" stroke="#8a9e7b" stroke-width="2"/>
+      <circle cx="36" cy="22" r="7" fill="none" stroke="#8a9e7b" stroke-width="2"/>
+      <circle cx="28" cy="40" r="9" fill="none" stroke="#8a9e7b" stroke-width="2"/>
+      <circle cx="16" cy="22" r="2" fill="#8a9e7b"/>
+      <circle cx="36" cy="22" r="2" fill="#8a9e7b"/>
+      <circle cx="28" cy="40" r="2" fill="#8a9e7b"/>
+    </svg>`,
+    diplomacy: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <circle cx="28" cy="28" r="18" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <path d="M10 28 Q20 18 28 28 Q36 38 46 28" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <circle cx="18" cy="22" r="3" fill="#d4a745"/>
+      <circle cx="38" cy="34" r="3" fill="#d4a745"/>
+      <line x1="18" y1="22" x2="38" y2="34" stroke="#d4a745" stroke-width="1.5" stroke-dasharray="3,3"/>
+    </svg>`,
+    religion: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <path d="M28 6 L34 20 L50 20 L38 30 L42 46 L28 36 L14 46 L18 30 L6 20 L22 20 Z" fill="none" stroke="#d4a745" stroke-width="1.5"/>
+      <circle cx="28" cy="26" r="4" fill="#d4a745" opacity="0.5"/>
+    </svg>`,
+    archaeology: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <path d="M8 44 Q8 28 28 18 Q48 28 48 44" fill="none" stroke="#8a7a5a" stroke-width="2.5"/>
+      <line x1="28" y1="18" x2="28" y2="44" stroke="#8a7a5a" stroke-width="1" stroke-dasharray="3,3"/>
+      <circle cx="22" cy="36" r="3" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <circle cx="34" cy="40" r="2" fill="none" stroke="#d4a745" stroke-width="1.5"/>
+    </svg>`,
+    figure: `<svg width="${size}" height="${size}" viewBox="0 0 56 56">
+      <circle cx="28" cy="16" r="8" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <path d="M14 46 Q14 30 28 30 Q42 30 42 46" fill="none" stroke="#d4a745" stroke-width="2"/>
+      <circle cx="28" cy="14" r="2" fill="#d4a745"/>
+    </svg>`
+  };
+  return svgs[type] || svgs['culture'];
+}
+
+// ============ 根据视角类型获取主题色 ============
+function getColorForPerspectiveType(type) {
+  const colorMap = {
+    politics: 'rgba(212,167,69,',
+    military: 'rgba(201,79,58,',
+    economy: 'rgba(138,158,123,',
+    technology: 'rgba(123,158,179,',
+    society: 'rgba(138,158,123,',
+    diplomacy: 'rgba(173,140,100,',
+    religion: 'rgba(200,160,100,',
+    culture: 'rgba(210,160,70,',
+    archaeology: 'rgba(160,130,80,',
+    figure: 'rgba(190,120,80,'
+  };
+  return colorMap[type] || 'rgba(212,167,69,';
+}
+
+// ============ 主题切换 ============
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme-btn');
+  btn.textContent = theme === 'dark' ? '🌙 夜间模式' : '☀️ 白天模式';
+  // 更新粒子颜色
+  initParticles();
+}
+
+// ============ 粒子动画 ============
+let particles = [];
+let animationId;
+
+function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particleColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color').trim();
+
+  // 创建粒子
+  particles = [];
+  const count = 50;
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 2.5 + 0.8,
+      opacity: Math.random() * 0.5 + 0.1
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = particleColor.replace(')', `, ${p.opacity})`).replace('rgb', 'rgba');
+      if (particleColor.startsWith('#')) {
+        const r = parseInt(particleColor.slice(1,3), 16);
+        const g = parseInt(particleColor.slice(3,5), 16);
+        const b = parseInt(particleColor.slice(5,7), 16);
+        ctx.fillStyle = `rgba(${r},${g},${b},${p.opacity})`;
+      }
+      ctx.fill();
+
+      // 绘制连接线
+      particles.forEach(p2 => {
+        const dx = p.x - p2.x;
+        const dy = p.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          const alpha = (1 - dist / 120) * 0.12;
+          ctx.strokeStyle = particleColor.startsWith('#')
+            ? `rgba(${parseInt(particleColor.slice(1,3),16)},${parseInt(particleColor.slice(3,5),16)},${parseInt(particleColor.slice(5,7),16)},${alpha})`
+            : particleColor.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      });
+    });
+    animationId = requestAnimationFrame(animate);
+  }
+
+  if (animationId) cancelAnimationFrame(animationId);
+  animate();
+}
+
+// ============ 启动应用 ============
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+});
+</script>
+</body>
+</html>
